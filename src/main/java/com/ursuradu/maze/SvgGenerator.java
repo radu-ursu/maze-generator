@@ -156,6 +156,39 @@ public class SvgGenerator {
                      </g>
                     """;
         }
+        if (directions.equals(Set.of(DIRECTION.DOWN))) {
+            return transform + """
+                    <rect x="0" y="0" width="200" height="200" class="tile-bg"/>
+                    <path d="M 100 200 L 100 100" class="path-outer"/>
+                    <path d="M 100 200 L 100 110" class="path-inner"/>
+                    </g>
+                    """;
+        }
+        if (directions.equals(Set.of(DIRECTION.UP))) {
+            return transform + """
+                    <rect x="0" y="0" width="200" height="200" class="tile-bg"/>
+                    <path d="M 100 0 L 100 100" class="path-outer"/>
+                    <path d="M 100 0 L 100 90" class="path-inner"/>
+                    </g>
+                    """;
+        }
+        if (directions.equals(Set.of(DIRECTION.LEFT))) {
+            return transform + """
+                    <rect x="0" y="0" width="200" height="200" class="tile-bg"/>
+                    <path d="M 0 100 L 100 100" class="path-outer"/>
+                    <path d="M 0 100 L 90 100" class="path-inner"/>
+                    </g>
+                    """;
+        }
+        if (directions.equals(Set.of(DIRECTION.RIGHT))) {
+            return transform + """
+                    <rect x="0" y="0" width="200" height="200" class="tile-bg"/>
+                    <path d="M 200 100 L 100 100" class="path-outer"/>
+                    <path d="M 200 100 L 110 100" class="path-inner"/>
+                    </g>
+                    """;
+        }
+
         return transform + """
                  <rect x="0" y="0" width="200" height="200" class="tile-bg"/>
                    </g>
