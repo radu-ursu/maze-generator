@@ -6,23 +6,24 @@ import java.util.Random;
 public class RandomGenerator {
     static Random random = new Random();
 
-    public static BoardNode getRandomNode(Board board) {
-        int randomX = random.nextInt(board.getLAST_X_POSITION() + 1);
-        int randomY = random.nextInt(board.getLAST_Y_POSITION() + 1);
+    public static Position getRandomPosition(Maze maze) {
+        int randomX = random.nextInt(maze.getWidth());
+        int randomY = random.nextInt(maze.getHeight());
         System.out.println("randomX: " + randomX + " randomY: " + randomY);
-        return board.getNodes().get(new Position(randomX, randomY));
+        return new Position(randomX, randomY);
     }
 
-    public static BoardNode getRandomEdgeNode(Board board) {
-        BoardNode node;
+    public static Position getRandomEdgeNode(Maze maze) {
+        Position position;
         do {
-            node = getRandomNode(board);
+            position = getRandomPosition(maze);
         }
-        while (!board.isEdge(node));
-        return node;
+        while (!maze.isEdge(position));
+        return position;
     }
 
-    public static BoardNode getRandomNodeFrom(List<BoardNode> nodes) {
-        return nodes.get(random.nextInt(nodes.size()));
+    public static Position getRandomPositionFrom(List<Position> positions) {
+        return positions.get(random.nextInt(positions.size()));
     }
+
 }

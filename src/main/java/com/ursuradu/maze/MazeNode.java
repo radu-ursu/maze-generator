@@ -10,17 +10,13 @@ import java.util.List;
 @Setter
 public class MazeNode {
 
-    private BoardNode boardNode;
+    private Position position;
     private MazeNode parent;
     private List<MazeNode> children = new ArrayList<>();
 
-    public MazeNode(BoardNode boardNode) {
-        this.boardNode = boardNode;
-    }
-
-    public MazeNode(BoardNode boardNode, MazeNode parent) {
-        this.boardNode = boardNode;
+    public MazeNode(MazeNode parent, Position position) {
         this.parent = parent;
+        this.position = position;
     }
 
     public boolean isRoot() {

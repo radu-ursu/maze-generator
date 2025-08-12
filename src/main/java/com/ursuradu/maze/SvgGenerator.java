@@ -3,28 +3,33 @@ package com.ursuradu.maze;
 import java.util.HashSet;
 import java.util.Set;
 
+import static com.ursuradu.maze.DIRECTION.*;
+
 public class SvgGenerator {
 
-    int scale = 200; // space between nodes
+    private int scale = 200; // space between nodes
 
     private static void extractDirections(MazeNode node, MazeNode child, Set<DIRECTION> directions) {
-        if (child.getBoardNode().getX() == node.getBoardNode().getX() - 1) {
+        if (child.getPosition().x() == node.getPosition().x() - 1) {
             directions.add(DIRECTION.LEFT);
         }
-        if (child.getBoardNode().getX() == node.getBoardNode().getX() + 1) {
-            directions.add(DIRECTION.RIGHT);
+        if (child.getPosition().x() == node.getPosition().x() + 1) {
+            directions.add(RIGHT);
         }
-        if (child.getBoardNode().getY() == node.getBoardNode().getY() + 1) {
+        if (child.getPosition().y() == node.getPosition().y() + 1) {
             directions.add(DIRECTION.DOWN);
         }
-        if (child.getBoardNode().getY() == node.getBoardNode().getY() - 1) {
+        if (child.getPosition().y() == node.getPosition().y() - 1) {
             directions.add(DIRECTION.UP);
         }
     }
 
-    public String generateSVG(MazeNode root) {
+    public String generateSVG(Maze maze) {
         StringBuilder svg = new StringBuilder();
-        svg.append("<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 1000 1000'>\n");
+        int viewBoxWidth = maze.getWidth() * scale;
+        int viewBoxHeight = maze.getHeight() * scale;
+        svg.append("<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 ");
+        svg.append(viewBoxWidth).append(" ").append(viewBoxHeight).append("'>\n");
         svg.append("""
                 <style>
                             .tile-bg {
@@ -46,7 +51,7 @@ public class SvgGenerator {
                 """);
 
 //        Set<MazeNode> visited = new HashSet<>();
-        traverseAndDraw(root, svg, null);
+        traverseAndDraw(maze.getRoot(), svg, null);
 
         svg.append("</svg>");
         return svg.toString();
@@ -57,17 +62,17 @@ public class SvgGenerator {
 
         // Draw node
         String svgForNode = determineTypeOfShape(node);
+        svg.append(svgForNode);
         // Draw links to children
         for (MazeNode child : node.getChildren()) {
-            svg.append(svgForNode);
             traverseAndDraw(child, svg, visited);
         }
     }
 
     private String determineTypeOfShape(MazeNode node) {
 
-        int x = node.getBoardNode().getX() * scale;
-        int y = node.getBoardNode().getY() * scale;
+        int x = node.getPosition().x() * scale;
+        int y = node.getPosition().y() * scale;
         String transform = "<g transform=\"translate(" + x + "," + y + ")\">\n";
 
         Set<DIRECTION> directions = new HashSet<>();
@@ -84,7 +89,7 @@ public class SvgGenerator {
                      </g>
                     """;
         }
-        if (directions.equals(Set.of(DIRECTION.LEFT, DIRECTION.RIGHT))) {
+        if (directions.equals(Set.of(DIRECTION.LEFT, RIGHT))) {
             return transform + """
                     <rect x="0" y="0" width="200" height="200" class="tile-bg"/>
                     <path d="M 0 100 L 200 100 " class="path-outer"/>
@@ -92,7 +97,7 @@ public class SvgGenerator {
                                        </g>
                     """;
         }
-        if (directions.equals(Set.of(DIRECTION.DOWN, DIRECTION.RIGHT))) {
+        if (directions.equals(Set.of(DIRECTION.DOWN, RIGHT))) {
             return transform + """
                     <rect x="0" y="0" width="200" height="200" class="tile-bg"/>
                     <path d="M 100 200 L 100 100 L 200 100" class="path-outer"/>
@@ -116,7 +121,7 @@ public class SvgGenerator {
                     </g>
                     """;
         }
-        if (directions.equals(Set.of(DIRECTION.UP, DIRECTION.RIGHT))) {
+        if (directions.equals(Set.of(DIRECTION.UP, RIGHT))) {
             return transform + """
                     <rect x="0" y="0" width="200" height="200" class="tile-bg"/>
                     <path d="M 100 0 L 100 100 L 200 100" class="path-outer"/>
@@ -132,7 +137,7 @@ public class SvgGenerator {
                     </g>
                     """;
         }
-        if (directions.equals(Set.of(DIRECTION.UP, DIRECTION.DOWN, DIRECTION.RIGHT))) {
+        if (directions.equals(Set.of(DIRECTION.UP, DIRECTION.DOWN, RIGHT))) {
             return transform + """
                     <rect x="0" y="0" width="200" height="200" class="tile-bg"/>
                     <path d="M 100 100 L 200 100 M 100 0 L 100 200" class="path-outer"/>
@@ -140,7 +145,7 @@ public class SvgGenerator {
                     </g>
                     """;
         }
-        if (directions.equals(Set.of(DIRECTION.UP, DIRECTION.LEFT, DIRECTION.RIGHT))) {
+        if (directions.equals(Set.of(DIRECTION.UP, DIRECTION.LEFT, RIGHT))) {
             return transform + """
                     <rect x="0" y="0" width="200" height="200" class="tile-bg"/>
                     <path d="M 0 100 L 200 100 M 100 0 L 100 100" class="path-outer"/>
@@ -148,7 +153,7 @@ public class SvgGenerator {
                     </g>
                     """;
         }
-        if (directions.equals(Set.of(DIRECTION.DOWN, DIRECTION.LEFT, DIRECTION.RIGHT))) {
+        if (directions.equals(Set.of(DIRECTION.DOWN, DIRECTION.LEFT, RIGHT))) {
             return transform + """
                     <rect x="0" y="0" width="200" height="200" class="tile-bg"/>
                     <path d="M 0 100 L 200 100 M 100 100 L 100 200" class="path-outer"/>
@@ -180,11 +185,21 @@ public class SvgGenerator {
                     </g>
                     """;
         }
-        if (directions.equals(Set.of(DIRECTION.RIGHT))) {
+        if (directions.equals(Set.of(RIGHT))) {
             return transform + """
                     <rect x="0" y="0" width="200" height="200" class="tile-bg"/>
                     <path d="M 200 100 L 100 100" class="path-outer"/>
                     <path d="M 200 100 L 110 100" class="path-inner"/>
+                    </g>
+                    """;
+        }
+        if (directions.equals(Set.of(RIGHT, LEFT, UP, DOWN))) {
+            return transform + """
+                    <rect x="0" y="0" width="200" height="200" class="tile-bg"/>
+                    <path d="M 100 0 L 100 200" class="path-outer"/>
+                    <path d="M 0 100 L 200 100" class="path-outer"/>
+                    <path d="M 100 0 L 100 200" class="path-inner"/>
+                    <path d="M 0 100 L 200 100" class="path-inner"/>
                     </g>
                     """;
         }
