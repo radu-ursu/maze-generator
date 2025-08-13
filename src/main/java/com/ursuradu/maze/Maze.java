@@ -17,7 +17,6 @@ public class Maze {
     private int height;
     private MazeNode root;
 
-
     public Maze(int width, int height) {
         this.width = width;
         this.height = height;
@@ -25,10 +24,6 @@ public class Maze {
 
     public void addNodeToMaze(MazeNode root) {
         nodesByPosition.put(root.getPosition(), root);
-    }
-
-    public boolean isComplete() {
-        return nodesByPosition.size() == width * height;
     }
 
     public boolean isEdge(Position position) {
@@ -62,4 +57,5 @@ public class Maze {
         }
         return result;
     }
+
 }

@@ -19,7 +19,7 @@ public class MazeGenerator {
         maze.setRoot(root);
         addNodeToMaze(root, null);
 
-        while (!maze.isComplete()) {
+        while (!nonFinalMazeNodes.isEmpty()) {
             addNextNode();
         }
 
