@@ -2,84 +2,84 @@ package com.ursuradu.maze;
 
 import java.util.Set;
 
-import static com.ursuradu.maze.DIRECTION.*;
+import static com.ursuradu.maze.Direction.*;
 
-public class ThickShapes {
+public class ThickShapes implements ShapeProvider {
 
-    public static String getShapeSvg(Set<DIRECTION> directions) {
-        if (directions.equals(Set.of(DIRECTION.UP, DIRECTION.DOWN))) {
+    public String getShapeSvg(Set<Direction> directions) {
+        if (directions.equals(Set.of(Direction.UP, Direction.DOWN))) {
             return """
                      <path d="M 100 0 L 100 200" class="path-outer"/>
                      <path d="M 100 0 L 100 200" class="path-inner"/>
                     """;
         }
-        if (directions.equals(Set.of(DIRECTION.LEFT, RIGHT))) {
+        if (directions.equals(Set.of(Direction.LEFT, RIGHT))) {
             return """
                     <path d="M 0 100 L 200 100 " class="path-outer"/>
                     <path d="M 0 100 L 200 100 " class="path-inner"/>
                     """;
         }
-        if (directions.equals(Set.of(DIRECTION.DOWN, RIGHT))) {
+        if (directions.equals(Set.of(Direction.DOWN, RIGHT))) {
             return """
                     <path d="M 100 200 L 100 100 L 200 100" class="path-outer"/>
                     <path d="M 100 200 L 100 100 L 200 100" class="path-inner"/>
                     """;
         }
-        if (directions.equals(Set.of(DIRECTION.DOWN, DIRECTION.LEFT))) {
+        if (directions.equals(Set.of(Direction.DOWN, Direction.LEFT))) {
             return """
                     <path d="M 100 200 L 100 100 L 0 100" class="path-outer"/>
                     <path d="M 100 200 L 100 100 L 0 100" class="path-inner"/>
                     """;
         }
-        if (directions.equals(Set.of(DIRECTION.UP, DIRECTION.LEFT))) {
+        if (directions.equals(Set.of(Direction.UP, Direction.LEFT))) {
             return """
                     <path d="M 100 0 L 100 100 L 0 100" class="path-outer"/>
                     <path d="M 100 0 L 100 100 L 0 100" class="path-inner"/>
                     """;
         }
-        if (directions.equals(Set.of(DIRECTION.UP, RIGHT))) {
+        if (directions.equals(Set.of(Direction.UP, RIGHT))) {
             return """
                     <path d="M 100 0 L 100 100 L 200 100" class="path-outer"/>
                     <path d="M 100 0 L 100 100 L 200 100" class="path-inner"/>
                     """;
         }
-        if (directions.equals(Set.of(DIRECTION.UP, DIRECTION.DOWN, DIRECTION.LEFT))) {
+        if (directions.equals(Set.of(Direction.UP, Direction.DOWN, Direction.LEFT))) {
             return """
                     <path d="M 0 100 L 100 100 M 100 0 L 100 200" class="path-outer"/>
                     <path d="M 0 100 L 100 100 M 100 0 L 100 200" class="path-inner"/>
                     """;
         }
-        if (directions.equals(Set.of(DIRECTION.UP, DIRECTION.DOWN, RIGHT))) {
+        if (directions.equals(Set.of(Direction.UP, Direction.DOWN, RIGHT))) {
             return """
                     <path d="M 100 100 L 200 100 M 100 0 L 100 200" class="path-outer"/>
                     <path d="M 100 100 L 200 100 M 100 0 L 100 200" class="path-inner"/>
                     """;
         }
-        if (directions.equals(Set.of(DIRECTION.UP, DIRECTION.LEFT, RIGHT))) {
+        if (directions.equals(Set.of(Direction.UP, Direction.LEFT, RIGHT))) {
             return """
                     <path d="M 0 100 L 200 100 M 100 0 L 100 100" class="path-outer"/>
                     <path d="M 0 100 L 200 100 M 100 0 L 100 100" class="path-inner"/>
                     """;
         }
-        if (directions.equals(Set.of(DIRECTION.DOWN, DIRECTION.LEFT, RIGHT))) {
+        if (directions.equals(Set.of(Direction.DOWN, Direction.LEFT, RIGHT))) {
             return """
                     <path d="M 0 100 L 200 100 M 100 100 L 100 200" class="path-outer"/>
                     <path d="M 0 100 L 200 100 M 100 100 L 100 200" class="path-inner"/>
                     """;
         }
-        if (directions.equals(Set.of(DIRECTION.DOWN))) {
+        if (directions.equals(Set.of(Direction.DOWN))) {
             return """
                     <path d="M 100 200 L 100 100" class="path-outer"/>
                     <path d="M 100 200 L 100 110" class="path-inner"/>
                     """;
         }
-        if (directions.equals(Set.of(DIRECTION.UP))) {
+        if (directions.equals(Set.of(Direction.UP))) {
             return """
                     <path d="M 100 0 L 100 100" class="path-outer"/>
                     <path d="M 100 0 L 100 90" class="path-inner"/>
                     """;
         }
-        if (directions.equals(Set.of(DIRECTION.LEFT))) {
+        if (directions.equals(Set.of(Direction.LEFT))) {
             return """
                     <path d="M 0 100 L 100 100" class="path-outer"/>
                     <path d="M 0 100 L 90 100" class="path-inner"/>
@@ -103,5 +103,10 @@ public class ThickShapes {
         return """
                  <rect x="0" y="0" width="200" height="200" class="tile-bg"/>
                 """;
+    }
+
+    @Override
+    public String getBridgeShapeSvg() {
+        return ""; // TODO
     }
 }

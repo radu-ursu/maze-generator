@@ -3,6 +3,7 @@ package com.ursuradu.maze;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 
 public class MazeGenerator {
 
@@ -10,9 +11,12 @@ public class MazeGenerator {
     static Maze maze;
     static Map<Position, MazeNode> nonFinalMazeNodes = new HashMap<>();
 
-    public static Maze generateMaze(int maxX, int maxY) {
+    static MazeNode currentBridgeNode;
+    static Direction currentBridgeDirection;
 
-        maze = new Maze(maxX, maxY);
+    public static Maze generateMaze(MazeConfig mazeConfig) {
+
+        maze = new Maze(mazeConfig);
         Position startPosition = RandomGenerator.getRandomEdgeNode(maze);
 
         MazeNode root = new MazeNode(null, startPosition);
@@ -28,10 +32,38 @@ public class MazeGenerator {
 
     private static void addNextNode() {
         MazeNode nodeToStartFrom = getNodeToStartFrom();
-        Position randomFreeNeighbourPosition = getRandomFreeNeighbour(nodeToStartFrom);
-        if (randomFreeNeighbourPosition != null) {
-            MazeNode newMazeNode = new MazeNode(nodeToStartFrom, randomFreeNeighbourPosition);
-            addNodeToMaze(newMazeNode, nodeToStartFrom);
+        Position nextFreePosition = null;
+        if (currentBridgeDirection != null) {
+            Optional<Position> nextPosition = maze.getPositionFrom(currentBridgeNode.getPosition(), currentBridgeDirection);
+            if (nextPosition.isEmpty()) {
+                throw new RuntimeException("Something bad happened, this should have been checked");
+            } else {
+                if (maze.nodesByPosition.containsKey(nextPosition.get())) {
+
+                } else {
+                    // found free position, ending bridge making
+                    nextFreePosition = nextPosition.get();
+                    currentBridgeDirection = null;
+                    currentBridgeNode = null;
+                }
+
+            }
+        } else {
+            nextFreePosition = getRandomFreeNeighbour(nodeToStartFrom);
+        }
+        if (nextFreePosition != null) {
+            boolean startingBridge = maze.nodesByPosition.containsKey(nextFreePosition);
+            if (startingBridge) {
+                System.out.println("Creating bridge on position " + nextFreePosition);
+                MazeNode nodeThatWillBeABridge = maze.nodesByPosition.get(nextFreePosition);
+                nonFinalMazeNodes.remove(nodeThatWillBeABridge.getPosition());
+                currentBridgeNode = nodeThatWillBeABridge;
+
+                currentBridgeDirection = maze.getMovementDirection(nodeToStartFrom.getPosition(), nodeThatWillBeABridge.getPosition());
+            } else {
+                MazeNode newMazeNode = new MazeNode(nodeToStartFrom, nextFreePosition);
+                addNodeToMaze(newMazeNode, nodeToStartFrom);
+            }
         } else {
             System.out.println("Marking as final " + nodeToStartFrom.getPosition());
             nonFinalMazeNodes.remove(nodeToStartFrom.getPosition());
@@ -39,6 +71,9 @@ public class MazeGenerator {
     }
 
     private static MazeNode getNodeToStartFrom() {
+        if (currentBridgeNode != null) {
+            return currentBridgeNode;
+        }
         if (nonFinalMazeNodes.containsKey(lastAddedNode.getPosition())) {
             System.out.println("Looking at lastAddedNode " + lastAddedNode.getPosition());
             return lastAddedNode;
@@ -50,7 +85,9 @@ public class MazeGenerator {
     }
 
     private static Position getRandomFreeNeighbour(MazeNode fromNode) {
-        List<Position> freeBoardNeighbours = maze.getFreeNearbyPositions(fromNode);
+        List<Position> freeBoardNeighbours =
+                maze.getMazeConfig().hasBridges() ? maze.getFreeNearbyPositionsWithBridges(fromNode) :
+                        maze.getFreeNearbyPositionsNoBridges(fromNode);
         if (freeBoardNeighbours.isEmpty()) {
             return null;
         }

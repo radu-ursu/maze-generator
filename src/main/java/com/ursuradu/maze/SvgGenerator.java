@@ -3,7 +3,7 @@ package com.ursuradu.maze;
 import java.util.HashSet;
 import java.util.Set;
 
-import static com.ursuradu.maze.DIRECTION.*;
+import static com.ursuradu.maze.Direction.*;
 
 public class SvgGenerator {
 
@@ -12,31 +12,17 @@ public class SvgGenerator {
     private Set<Position> pathPositions = new HashSet<>();
     private MazeEdgePaths.PathResult pathResult;
     private Maze maze;
-
-
-    private static void extractDirections(MazeNode node, MazeNode child, Set<DIRECTION> directions) {
-        if (child.getPosition().x() == node.getPosition().x() - 1) {
-            directions.add(DIRECTION.LEFT);
-        }
-        if (child.getPosition().x() == node.getPosition().x() + 1) {
-            directions.add(RIGHT);
-        }
-        if (child.getPosition().y() == node.getPosition().y() + 1) {
-            directions.add(DIRECTION.DOWN);
-        }
-        if (child.getPosition().y() == node.getPosition().y() - 1) {
-            directions.add(DIRECTION.UP);
-        }
-    }
+    private ShapeProvider shapeProvider;
 
 
     public String generateSVG(Maze maze, MazeEdgePaths.PathResult pathResult) {
         pathPositions = new HashSet<>();
         this.pathResult = pathResult;
-        this.pathResult.getNodes().forEach(node -> {
-            pathPositions.add(node.getPosition());
-        });
+//        this.pathResult.getNodes().forEach(node -> {
+//            pathPositions.add(node.getPosition());
+//        });
         this.maze = maze;
+        this.shapeProvider = getShapeProvider(maze.getMazeConfig());
         StringBuilder svg = new StringBuilder();
         int viewBoxWidth = maze.getWidth() * scale;
         int viewBoxHeight = maze.getHeight() * scale;
@@ -85,6 +71,16 @@ public class SvgGenerator {
         return svg.toString();
     }
 
+    private ShapeProvider getShapeProvider(MazeConfig mazeConfig) {
+        if (mazeConfig.drawType().equals(MazeDrawType.THICK)) {
+            return new ThickShapes();
+        }
+        if (mazeConfig.drawType().equals(MazeDrawType.CLASSIC)) {
+            return new MarginShapes();
+        }
+        throw new IllegalArgumentException("Don't know what shapeProvider to provide");
+    }
+
     void traverseAndDraw(MazeNode node, StringBuilder svg) {
         // Draw node
         String svgForNode = getShape(node);
@@ -101,14 +97,13 @@ public class SvgGenerator {
         int y = node.getPosition().y() * scale;
         StringBuilder shapeSvg = new StringBuilder("<g transform=\"translate(" + x + "," + y + ")\">\n");
 
-        Set<DIRECTION> directions = new HashSet<>();
-        node.getChildren().forEach(child -> extractDirections(node, child, directions));
-        if (node.getParent() != null) {
-            extractDirections(node, node.getParent(), directions);
+        if (node instanceof BridgeMazeNode) {
+            shapeSvg.append(shapeProvider.getBridgeShapeSvg());
+        } else {
+            Set<Direction> directions = maze.getDirectionsToLinks(node);
+            addDirectionForStartAndEndOfPath(node, directions);
+            shapeSvg.append(shapeProvider.getShapeSvg(directions));
         }
-        addDirectionForStartAndEndOfPath(node, directions);
-
-        shapeSvg.append(MarginShapes.getShapeSvg(directions));
         if (pathPositions.contains(node.getPosition())) {
             shapeSvg.append("""
                     <rect x="95" y="95" width="10" height="10" class="correct-path"/>
@@ -118,7 +113,7 @@ public class SvgGenerator {
         return shapeSvg.toString();
     }
 
-    private void addDirectionForStartAndEndOfPath(MazeNode node, Set<DIRECTION> directions) {
+    private void addDirectionForStartAndEndOfPath(MazeNode node, Set<Direction> directions) {
         if (isFirstNodeOfThePath(node) || isLastNodeOfThePath(node)) {
             if (node.getPosition().x() == 0) {
                 directions.add(LEFT);

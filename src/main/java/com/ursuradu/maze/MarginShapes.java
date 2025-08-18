@@ -2,16 +2,7 @@ package com.ursuradu.maze;
 
 import java.util.Set;
 
-public final class MarginShapes {
-    private MarginShapes() {
-    }
-
-    /**
-     * Default TILE=200, wall thickness M=40.
-     */
-    public static String getShapeSvg(Set<DIRECTION> dirs) {
-        return getShapeSvg(dirs, 200, 10);
-    }
+public final class MarginShapes implements ShapeProvider {
 
     /**
      * Draw ONLY the internal margins (walls) for a cell as a single <path>.
@@ -21,12 +12,12 @@ public final class MarginShapes {
      * @param TILE tile size in px (e.g., 200)
      * @param M    wall thickness in px
      */
-    public static String getShapeSvg(Set<DIRECTION> dirs, int TILE, int M) {
+    public String getShapeSvg(Set<Direction> dirs, int TILE, int M) {
         final int m = Math.max(0, Math.min(M, TILE)); // clamp
-        final boolean openUp = dirs.contains(DIRECTION.UP);
-        final boolean openDown = dirs.contains(DIRECTION.DOWN);
-        final boolean openLeft = dirs.contains(DIRECTION.LEFT);
-        final boolean openRight = dirs.contains(DIRECTION.RIGHT);
+        final boolean openUp = dirs.contains(Direction.UP);
+        final boolean openDown = dirs.contains(Direction.DOWN);
+        final boolean openLeft = dirs.contains(Direction.LEFT);
+        final boolean openRight = dirs.contains(Direction.RIGHT);
 
         StringBuilder d = new StringBuilder();
 
@@ -53,5 +44,17 @@ public final class MarginShapes {
         }
 
         return "<path d=\"" + d + "\" class=\"wall\" fill-rule=\"nonzero\"/>\n";
+    }
+
+    /**
+     * Default TILE=200, wall thickness M=40.
+     */
+    public String getShapeSvg(Set<Direction> dirs) {
+        return getShapeSvg(dirs, 200, 10);
+    }
+
+    @Override
+    public String getBridgeShapeSvg() {
+        throw new IllegalArgumentException();
     }
 }

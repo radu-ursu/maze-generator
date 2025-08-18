@@ -10,9 +10,9 @@ import java.util.List;
 @Setter
 public class MazeNode {
 
-    private Position position;
-    private MazeNode parent;
-    private List<MazeNode> children = new ArrayList<>();
+    protected Position position;
+    protected MazeNode parent;
+    protected List<MazeNode> children = new ArrayList<>();
 
     public MazeNode(MazeNode parent, Position position) {
         this.parent = parent;
@@ -23,4 +23,7 @@ public class MazeNode {
         return parent == null;
     }
 
+    public List<MazeNode> getChildren(MazeNodeOrientation orientation) {
+        return children;
+    }
 }
