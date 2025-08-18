@@ -1,6 +1,6 @@
 package com.ursuradu.maze;
 
-public enum DIRECTION {
+public enum Direction {
     UP,
     DOWN,
     LEFT,
