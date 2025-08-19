@@ -22,10 +22,12 @@ public class Board {
   private final Set<Position> nonFinalPositions = new HashSet<>();
   private final int width;
   private final int height;
+  private final List<Portal> portals = new ArrayList<>();
+  private final List<Position> portalPositions = new ArrayList<>();
 
-  public Board(final int width, final int height) {
-    this.width = width;
-    this.height = height;
+  public Board(final MazeConfig mazeConfig) {
+    this.width = mazeConfig.width();
+    this.height = mazeConfig.height();
     for (int x = 0; x < width; x++) {
       for (int y = 0; y < height; y++) {
         mazeMap.put(new Position(x, y), new ArrayList<>());

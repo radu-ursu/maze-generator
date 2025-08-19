@@ -61,7 +61,11 @@ public class SvgGenerator {
                                     }
                                     .wall {
                                       fill: #555;
-        //                            shape-rendering: crispEdges;
+                                    }
+                                    .portal {
+                                      stroke: #00e;
+                                      stroke-width: 1;
+                                      fill: none;
                                     }
                         </style>
         
@@ -70,7 +74,6 @@ public class SvgGenerator {
           <rect x="0" y="0" width="%d" height="%d" fill="#fff"/>
         """.formatted(viewBoxWidth, viewBoxHeight));
 
-//    traverseAndDraw(maze.getRoot(), svg);
     for (final Position position : board.getMazeMap().keySet()) {
       drawPosition(position, svg);
     }
@@ -96,16 +99,6 @@ public class SvgGenerator {
     svg.append(svgForNode);
   }
 
-//  void traverseAndDraw(final MazeNode node, final StringBuilder svg) {
-//    // Draw node
-//    final String svgForNode = getShape(node);
-//    svg.append(svgForNode);
-//    // Draw links to children
-//    for (final MazeNode child : node.getChildren()) {
-//      traverseAndDraw(child, svg);
-//    }
-//  }
-
   private String getShape(final List<MazeNode> nodes) {
 
     if (nodes.isEmpty()) {
@@ -126,6 +119,11 @@ public class SvgGenerator {
     if (pathPositions.contains(nodes.getFirst().getPosition())) {
       shapeSvg.append("""
           <rect x="95" y="95" width="10" height="10" class="correct-path"/>
+          """);
+    }
+    if (board.getPortalPositions().contains(nodes.getFirst().getPosition())) {
+      shapeSvg.append("""
+          <rect x="50" y="50" width="100" height="100" class="portal"/>
           """);
     }
     shapeSvg.append("</g>\n");

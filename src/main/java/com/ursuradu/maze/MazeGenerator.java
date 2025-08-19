@@ -51,7 +51,26 @@ public class MazeGenerator {
     throw new IllegalArgumentException("Invalid movement direction");
   }
 
+  private Position getNewPortalPosition() {
+    Position randomPosition;
+    do {
+      randomPosition = RandomGenerator.getRandomPosition(board);
+      if (!board.getPortalPositions().contains(randomPosition)) {
+        return randomPosition;
+      }
+    } while (true);
+  }
+
   public MazeNode generateMaze() {
+
+    for (int x = 0; x < mazeConfig.portals(); x++) {
+      final Position from = getNewPortalPosition();
+      final Position to = getNewPortalPosition();
+      board.getPortals().add(new Portal(from, to));
+      board.getPortalPositions().add(from);
+      board.getPortalPositions().add(to);
+    }
+
     final Position startPosition = RandomGenerator.getRandomEdgePosition(board);
     System.out.println("Root: " + startPosition);
     final MazeNode root = new MazeNode(startPosition, true);

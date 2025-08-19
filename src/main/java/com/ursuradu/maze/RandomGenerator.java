@@ -25,5 +25,4 @@ public class RandomGenerator {
   public static Position getRandomPositionFrom(final List<Position> positions) {
     return positions.get(random.nextInt(positions.size()));
   }
-
 }

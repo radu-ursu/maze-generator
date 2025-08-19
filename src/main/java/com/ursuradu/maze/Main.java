@@ -9,9 +9,9 @@ public class Main {
 
   public static void main(final String[] args) {
 
-    final MazeConfig mazeConfig = new MazeConfig(20, 20, true, MazeDrawType.THICK, true);
+    final MazeConfig mazeConfig = new MazeConfig(20, 20, true, MazeDrawType.THICK, true, 1);
     mazeConfig.validate();
-    final Board board = new Board(mazeConfig.width(), mazeConfig.height());
+    final Board board = new Board(mazeConfig);
     final MazeGenerator mazeGenerator = new MazeGenerator(board, mazeConfig);
     final MazeNode root = mazeGenerator.generateMaze();
     System.out.println("Generation completed");
