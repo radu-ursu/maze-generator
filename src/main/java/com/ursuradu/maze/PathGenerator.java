@@ -15,6 +15,7 @@ public class PathGenerator {
   public MazePath getPath(final MazeNode root) {
 
     processNodeAndChildren(root);
+    paths.forEach(System.out::println);
     return paths.stream().max(Comparator.comparingInt(o -> o.getNodes().size())).orElseThrow();
   }
 

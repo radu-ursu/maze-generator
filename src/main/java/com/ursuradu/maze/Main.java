@@ -9,7 +9,7 @@ public class Main {
 
   public static void main(final String[] args) {
 
-    final MazeConfig mazeConfig = new MazeConfig(20, 20, true, MazeDrawType.THICK, true, 1);
+    final MazeConfig mazeConfig = new MazeConfig(5, 5, true, MazeDrawType.THICK, true, 1);
     mazeConfig.validate();
     final Board board = new Board(mazeConfig);
     final MazeGenerator mazeGenerator = new MazeGenerator(board, mazeConfig);

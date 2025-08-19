@@ -12,6 +12,8 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 public class MazeGenerator {
 
@@ -20,6 +22,7 @@ public class MazeGenerator {
   private MazeNode lastAddedNode;
   private MazeNode currentBridgeNode;
   private Direction currentBridgeDirection;
+  private MazeNode currentPortalNode;
 
   public MazeGenerator(final Board board, final MazeConfig mazeConfig) {
     this.board = board;
@@ -51,12 +54,17 @@ public class MazeGenerator {
     throw new IllegalArgumentException("Invalid movement direction");
   }
 
-  private Position getNewPortalPosition() {
-    Position randomPosition;
+  private Portal getNewPortal() {
+    Position randomPosition1;
+    Position randomPosition2;
     do {
-      randomPosition = RandomGenerator.getRandomPosition(board);
-      if (!board.getPortalPositions().contains(randomPosition)) {
-        return randomPosition;
+      randomPosition1 = RandomGenerator.getRandomPosition(board);
+      randomPosition2 = RandomGenerator.getRandomPosition(board);
+      if (!board.isPortal(randomPosition1)
+          && !board.isPortal(randomPosition2)
+          && !randomPosition1.equals(randomPosition2)
+      ) {
+        return new Portal(randomPosition1, randomPosition2);
       }
     } while (true);
   }
@@ -64,11 +72,9 @@ public class MazeGenerator {
   public MazeNode generateMaze() {
 
     for (int x = 0; x < mazeConfig.portals(); x++) {
-      final Position from = getNewPortalPosition();
-      final Position to = getNewPortalPosition();
-      board.getPortals().add(new Portal(from, to));
-      board.getPortalPositions().add(from);
-      board.getPortalPositions().add(to);
+      board.getPortals().add(getNewPortal());
+      //debug
+      System.out.println(board.getPortals().getFirst());
     }
 
     final Position startPosition = RandomGenerator.getRandomEdgePosition(board);
@@ -86,6 +92,13 @@ public class MazeGenerator {
   private MazeNode getNodeToStartFrom() {
     if (currentBridgeNode != null) {
       return currentBridgeNode;
+    }
+    if (currentPortalNode != null) {
+      return currentPortalNode;
+    }
+    if (board.isPortal(lastAddedNode.getPosition())) {
+      //debug
+      System.out.println("Lastaddednode is portal");
     }
     if (board.getNonFinalPositions().contains(lastAddedNode.getPosition())) {
       System.out.println("Looking at lastAddedNode " + lastAddedNode.getPosition());
@@ -118,9 +131,24 @@ public class MazeGenerator {
   }
 
   private List<Position> getFreePositions(final MazeNode fromNode) {
-    if (!mazeConfig.hasBridges()) {
-      return board.getFreeNearbyPositions(fromNode);
-    } else {
+    // portal present on this node
+    System.out.println("Getting free positions");
+    final Position fromPosition = fromNode.getPosition();
+    if (board.getPortal(fromPosition).isPresent()) {
+      final Portal portal = board.getPortal(fromPosition).get();
+      System.out.println("Found portal " + fromPosition);
+      // exiting a portal
+      if (portal.getEnter() != null) {
+        System.out.println("On portal exit: " + fromPosition);
+        return board.getFreeNearbyPositions(fromNode);
+      } else {
+        portal.setEnter(fromPosition);
+        return Stream.of(
+                portal.getOtherPosition(fromPosition))
+            .collect(Collectors.toCollection(ArrayList::new));
+      }
+    }
+    if (mazeConfig.hasBridges()) {
       final List<Position> result = new ArrayList<>();
       final List<Position> nearbyPositions = board.getNearbyPositions(fromNode);
       for (final Position nearbyPosition : nearbyPositions) {
@@ -129,12 +157,14 @@ public class MazeGenerator {
         }
       }
       return result;
+    } else {
+      return board.getFreeNearbyPositions(fromNode);
     }
   }
 
-  private boolean canMakeBridge(final MazeNode mazeNode, final Position neighbourPosition) {
-    final Direction movementDirection = getMovementDirection(mazeNode.getPosition(), neighbourPosition);
-    Position currentPosition = mazeNode.getPosition();
+  private boolean canMakeBridge(final MazeNode fromNode, final Position neighbourPosition) {
+    final Direction movementDirection = getMovementDirection(fromNode.getPosition(), neighbourPosition);
+    Position currentPosition = fromNode.getPosition();
     while (true) {
       final Optional<Position> nextPosition = board.getPositionFrom(currentPosition, movementDirection);
       if (nextPosition.isPresent()) {
@@ -145,6 +175,10 @@ public class MazeGenerator {
           return true;
         } else {
           if (mazeNodesAtPosition.size() != 1) {
+            return false;
+          }
+          if (board.isPortal(nextPosition.get())) {
+            // is portal AND there is path there
             return false;
           }
           final MazeNodeOrientation orientation = getOrientation(mazeNodesAtPosition.getFirst());
@@ -185,6 +219,10 @@ public class MazeGenerator {
 
   private void addNextNode() {
     final MazeNode nodeToStartFrom = getNodeToStartFrom();
+    if (board.isPortal(nodeToStartFrom.getPosition())) {
+      //debug
+      System.out.println("Nodetostartfrom is portal");
+    }
     System.out.println("Starting from node: " + nodeToStartFrom.getPosition());
     final Optional<Position> nextFreePosition = getNextFreePosition(nodeToStartFrom);
 
@@ -200,13 +238,24 @@ public class MazeGenerator {
         currentBridgeNode = newMazeNode;
         currentBridgeDirection = getMovementDirection(nodeToStartFrom.getPosition(), nextPosition);
       } else {
+        // ending bridge
         if (currentBridgeNode != null) {
-          // ending bridge
           currentBridgeDirection = null;
           currentBridgeNode = null;
         }
         final MazeNode newMazeNode = new MazeNode(nodeToStartFrom, nextPosition, board.isEdge(nextPosition));
         addNodeToMaze(newMazeNode, nodeToStartFrom);
+        if (board.isPortal(nextPosition)) {
+          if (currentPortalNode != null) {
+            // entering portal
+            board.markAsFinal(nextPosition);
+            currentPortalNode = newMazeNode;
+          } else {
+            // exiting portal
+            board.markAsFinal(nextPosition);
+            currentPortalNode = null;
+          }
+        }
       }
     } else {
       board.markAsFinal(nodeToStartFrom.getPosition());

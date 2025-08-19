@@ -18,7 +18,7 @@ public class RandomGenerator {
     do {
       position = getRandomPosition(board);
     }
-    while (!board.isEdge(position));
+    while (!board.isEdge(position) || board.isPortal(position));
     return position;
   }
 

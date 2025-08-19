@@ -121,7 +121,7 @@ public class SvgGenerator {
           <rect x="95" y="95" width="10" height="10" class="correct-path"/>
           """);
     }
-    if (board.getPortalPositions().contains(nodes.getFirst().getPosition())) {
+    if (board.isPortal(nodes.getFirst().getPosition())) {
       shapeSvg.append("""
           <rect x="50" y="50" width="100" height="100" class="portal"/>
           """);

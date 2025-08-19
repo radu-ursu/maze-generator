@@ -23,7 +23,6 @@ public class Board {
   private final int width;
   private final int height;
   private final List<Portal> portals = new ArrayList<>();
-  private final List<Position> portalPositions = new ArrayList<>();
 
   public Board(final MazeConfig mazeConfig) {
     this.width = mazeConfig.width();
@@ -98,5 +97,18 @@ public class Board {
 
   public void addNode(final MazeNode mazeNode) {
     getMazeNodesAtPosition(mazeNode.getPosition()).add(mazeNode);
+  }
+
+  public Optional<Portal> getPortal(final Position position) {
+    for (final Portal portal : portals) {
+      if (portal.contains(position)) {
+        return Optional.of(portal);
+      }
+    }
+    return Optional.empty();
+  }
+
+  public boolean isPortal(final Position position) {
+    return getPortal(position).isPresent();
   }
 }
