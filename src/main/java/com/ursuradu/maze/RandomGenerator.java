@@ -4,26 +4,26 @@ import java.util.List;
 import java.util.Random;
 
 public class RandomGenerator {
-    static Random random = new Random();
 
-    public static Position getRandomPosition(Maze maze) {
-        int randomX = random.nextInt(maze.getWidth());
-        int randomY = random.nextInt(maze.getHeight());
-        System.out.println("randomX: " + randomX + " randomY: " + randomY);
-        return new Position(randomX, randomY);
-    }
+  static Random random = new Random();
 
-    public static Position getRandomEdgeNode(Maze maze) {
-        Position position;
-        do {
-            position = getRandomPosition(maze);
-        }
-        while (!maze.isEdge(position));
-        return position;
-    }
+  public static Position getRandomPosition(final Board board) {
+    final int randomX = random.nextInt(board.getWidth());
+    final int randomY = random.nextInt(board.getHeight());
+    return new Position(randomX, randomY);
+  }
 
-    public static Position getRandomPositionFrom(List<Position> positions) {
-        return positions.get(random.nextInt(positions.size()));
+  public static Position getRandomEdgePosition(final Board board) {
+    Position position;
+    do {
+      position = getRandomPosition(board);
     }
+    while (!board.isEdge(position));
+    return position;
+  }
+
+  public static Position getRandomPositionFrom(final List<Position> positions) {
+    return positions.get(random.nextInt(positions.size()));
+  }
 
 }

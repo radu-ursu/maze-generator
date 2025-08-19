@@ -1,52 +1,100 @@
 package com.ursuradu.maze;
 
-import java.util.*;
+import static com.ursuradu.maze.Direction.DOWN;
+import static com.ursuradu.maze.Direction.LEFT;
+import static com.ursuradu.maze.Direction.RIGHT;
+import static com.ursuradu.maze.Direction.UP;
 
-import static com.ursuradu.maze.Direction.*;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Optional;
+import java.util.Set;
 
+import lombok.Getter;
+
+@Getter
 public class Board {
 
-    private Map<Position, List<MazeNode>> mazeMap = new HashMap<>();
+  private final Map<Position, List<MazeNode>> mazeMap = new HashMap<>();
+  private final Set<Position> nonFinalPositions = new HashSet<>();
+  private final int width;
+  private final int height;
 
-    public Board(int width, int height) {
-        for (int x = 0; x < width; x++) {
-            for (int y = 0; y < height; y++) {
-                mazeMap.put(new Position(x, y), new ArrayList<>());
-            }
-        }
+  public Board(final int width, final int height) {
+    this.width = width;
+    this.height = height;
+    for (int x = 0; x < width; x++) {
+      for (int y = 0; y < height; y++) {
+        mazeMap.put(new Position(x, y), new ArrayList<>());
+      }
+    }
+  }
+
+  public List<Position> getFreeNearbyPositions(final MazeNode mazeNode) {
+    final List<Position> result = new ArrayList<>();
+    final List<Position> nearbyPositions = getNearbyPositions(mazeNode);
+    for (final Position neighbourPosition : nearbyPositions) {
+      if (isPositionFree(neighbourPosition)) {
+        result.add(neighbourPosition);
+      }
+    }
+    return result;
+  }
+
+  public List<Position> getNearbyPositions(final MazeNode node) {
+    final List<Position> result = new ArrayList<>();
+    getPositionFrom(node.getPosition(), LEFT).ifPresent(result::add);
+    getPositionFrom(node.getPosition(), RIGHT).ifPresent(result::add);
+    getPositionFrom(node.getPosition(), UP).ifPresent(result::add);
+    getPositionFrom(node.getPosition(), DOWN).ifPresent(result::add);
+    return result;
+  }
+
+  public List<MazeNode> getMazeNodesAtPosition(final Position position) {
+    return mazeMap.get(position);
+  }
+
+  public boolean isPositionFree(final Position position) {
+    return mazeMap.get(position).isEmpty();
+  }
+
+  public boolean isOutOfBounds(final Position position) {
+    return !mazeMap.containsKey(position);
+  }
+
+  public void markAsFinal(final Position position) {
+    System.out.println("Marking as final " + position);
+    nonFinalPositions.remove(position);
+  }
+
+  public Optional<Position> getPositionFrom(final Position position, final Direction direction) {
+    final Position newPosition;
+    if (direction == DOWN) {
+      newPosition = new Position(position.x(), position.y() + 1);
+    } else if (direction == UP) {
+      newPosition = new Position(position.x(), position.y() - 1);
+    } else if (direction == LEFT) {
+      newPosition = new Position(position.x() - 1, position.y());
+    } else if (direction == RIGHT) {
+      newPosition = new Position(position.x() + 1, position.y());
+    } else {
+      throw new IllegalArgumentException("Invalid direction " + direction);
     }
 
-    public List<MazeNode> getMazeNodesAtPosition(Position position) {
-        return mazeMap.get(position);
-    }
+    return isOutOfBounds(newPosition) ? Optional.empty() : Optional.of(newPosition);
+  }
 
-    public boolean isPositionFree(Position position) {
-        return mazeMap.get(position).isEmpty();
-    }
+  public boolean isEdge(final Position position) {
+    return getPositionFrom(position, DOWN).isEmpty()
+        || getPositionFrom(position, UP).isEmpty()
+        || getPositionFrom(position, LEFT).isEmpty()
+        || getPositionFrom(position, RIGHT).isEmpty();
+  }
 
-    public boolean isOutOfBounds(Position position) {
-        return mazeMap.containsKey(position);
-    }
-
-    public Optional<Position> getPositionFrom(Position position, Direction direction) {
-        Position newPosition;
-        if (direction == DOWN) {
-            newPosition = new Position(position.x(), position.y() + 1);
-        } else if (direction == UP) {
-            newPosition = new Position(position.x(), position.y() - 1);
-        } else if (direction == LEFT) {
-            newPosition = new Position(position.x() - 1, position.y());
-        } else if (direction == RIGHT) {
-            newPosition = new Position(position.x() + 1, position.y());
-        } else throw new IllegalArgumentException("Invalid direction " + direction);
-
-        return !isOutOfBounds(newPosition) ? Optional.of(newPosition) : Optional.empty();
-    }
-
-    public boolean isEdge(Position position) {
-        return getPositionFrom(position, DOWN).isEmpty()
-                || getPositionFrom(position, UP).isEmpty()
-                || getPositionFrom(position, LEFT).isEmpty()
-                || getPositionFrom(position, RIGHT).isEmpty();
-    }
+  public void addNode(final MazeNode mazeNode) {
+    getMazeNodesAtPosition(mazeNode.getPosition()).add(mazeNode);
+  }
 }

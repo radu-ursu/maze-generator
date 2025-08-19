@@ -1,111 +1,196 @@
 package com.ursuradu.maze;
 
-import java.util.HashMap;
+import static com.ursuradu.maze.Direction.DOWN;
+import static com.ursuradu.maze.Direction.LEFT;
+import static com.ursuradu.maze.Direction.RIGHT;
+import static com.ursuradu.maze.Direction.UP;
+import static com.ursuradu.maze.MazeNodeOrientation.HORIZONTAL;
+import static com.ursuradu.maze.MazeNodeOrientation.VERTICAL;
+
+import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
-import java.util.Map;
 import java.util.Optional;
+import java.util.Set;
 
 public class MazeGenerator {
 
-    static MazeNode lastAddedNode;
-    static Maze maze;
-    static Map<Position, MazeNode> nonFinalMazeNodes = new HashMap<>();
+  private final Board board;
+  private final MazeConfig mazeConfig;
+  private MazeNode lastAddedNode;
+  private MazeNode currentBridgeNode;
+  private Direction currentBridgeDirection;
 
-    static MazeNode currentBridgeNode;
-    static Direction currentBridgeDirection;
+  public MazeGenerator(final Board board, final MazeConfig mazeConfig) {
+    this.board = board;
+    this.mazeConfig = mazeConfig;
+  }
 
-    public static Maze generateMaze(MazeConfig mazeConfig) {
+  public static Set<Direction> getDirectionsToLinks(final MazeNode node) {
+    final Set<Direction> directions = new HashSet<>();
+    node.getChildren().forEach(child -> directions.add(getMovementDirection(node.getPosition(), child.getPosition())));
+    if (node.getParent() != null) {
+      directions.add(getMovementDirection(node.getPosition(), node.getParent().getPosition()));
+    }
+    return directions;
+  }
 
-        maze = new Maze(mazeConfig);
-        Position startPosition = RandomGenerator.getRandomEdgeNode(maze);
+  public static Direction getMovementDirection(final Position position, final Position neighbourPosition) {
+    if (position.x() < neighbourPosition.x()) {
+      return RIGHT;
+    }
+    if (position.x() > neighbourPosition.x()) {
+      return LEFT;
+    }
+    if (position.y() < neighbourPosition.y()) {
+      return DOWN;
+    }
+    if (position.y() > neighbourPosition.y()) {
+      return UP;
+    }
+    throw new IllegalArgumentException("Invalid movement direction");
+  }
 
-        MazeNode root = new MazeNode(null, startPosition);
-        maze.setRoot(root);
-        addNodeToMaze(root, null);
+  public MazeNode generateMaze() {
+    final Position startPosition = RandomGenerator.getRandomEdgePosition(board);
+    System.out.println("Root: " + startPosition);
+    final MazeNode root = new MazeNode(startPosition, true);
+    addNodeToMaze(root, null);
 
-        while (!nonFinalMazeNodes.isEmpty()) {
-            addNextNode();
-        }
-
-        return maze;
+    while (!board.getNonFinalPositions().isEmpty()) {
+      addNextNode();
     }
 
-    private static void addNextNode() {
-        MazeNode nodeToStartFrom = getNodeToStartFrom();
-        Position nextFreePosition = null;
-        if (currentBridgeDirection != null) {
-            Optional<Position> nextPosition = maze.getPositionFrom(currentBridgeNode.getPosition(), currentBridgeDirection);
-            if (nextPosition.isEmpty()) {
-                throw new RuntimeException("Something bad happened, this should have been checked");
-            } else {
-                if (maze.nodesByPosition.containsKey(nextPosition.get())) {
+    return root;
+  }
 
-                } else {
-                    // found free position, ending bridge making
-                    nextFreePosition = nextPosition.get();
-                    currentBridgeDirection = null;
-                    currentBridgeNode = null;
-                }
-
-            }
-        } else {
-            nextFreePosition = getRandomFreeNeighbour(nodeToStartFrom);
-        }
-        if (nextFreePosition != null) {
-            boolean startingBridge = maze.nodesByPosition.containsKey(nextFreePosition);
-            if (startingBridge) {
-                System.out.println("Creating bridge on position " + nextFreePosition);
-                MazeNode nodeThatWillBeABridge = maze.nodesByPosition.get(nextFreePosition);
-                nonFinalMazeNodes.remove(nodeThatWillBeABridge.getPosition());
-                currentBridgeNode = nodeThatWillBeABridge;
-
-                currentBridgeDirection = maze.getMovementDirection(nodeToStartFrom.getPosition(), nodeThatWillBeABridge.getPosition());
-            } else {
-                MazeNode newMazeNode = new MazeNode(nodeToStartFrom, nextFreePosition);
-                addNodeToMaze(newMazeNode, nodeToStartFrom);
-            }
-        } else {
-            System.out.println("Marking as final " + nodeToStartFrom.getPosition());
-            nonFinalMazeNodes.remove(nodeToStartFrom.getPosition());
-        }
+  private MazeNode getNodeToStartFrom() {
+    if (currentBridgeNode != null) {
+      return currentBridgeNode;
     }
+    if (board.getNonFinalPositions().contains(lastAddedNode.getPosition())) {
+      System.out.println("Looking at lastAddedNode " + lastAddedNode.getPosition());
+      return lastAddedNode;
+    } else {
+      final Position randomNonFinalPosition = RandomGenerator.getRandomPositionFrom(board.getNonFinalPositions().stream().toList());
+      System.out.println("Looking at nonFinalPosition " + randomNonFinalPosition);
+      // by convention bridges are final so we will not get them here
+      return board.getMazeMap().get(randomNonFinalPosition).getFirst();
+    }
+  }
 
-    private static MazeNode getNodeToStartFrom() {
+  private Optional<Position> getNextFreePosition(final MazeNode fromNode) {
+
+    // if currently in bridge, we must go in the same direction
+    if (currentBridgeDirection != null) {
+      final Optional<Position> nextPosition = board.getPositionFrom(currentBridgeNode.getPosition(), currentBridgeDirection);
+      if (nextPosition.isEmpty()) {
+        throw new RuntimeException("Something bad happened, this should have been checked");
+      } else {
+        return nextPosition;
+      }
+    } else {
+      final List<Position> freePositions = getFreePositions(fromNode);
+      if (freePositions.isEmpty()) {
+        return Optional.empty();
+      }
+      return Optional.ofNullable(RandomGenerator.getRandomPositionFrom(freePositions));
+    }
+  }
+
+  private List<Position> getFreePositions(final MazeNode fromNode) {
+    if (!mazeConfig.hasBridges()) {
+      return board.getFreeNearbyPositions(fromNode);
+    } else {
+      final List<Position> result = new ArrayList<>();
+      final List<Position> nearbyPositions = board.getNearbyPositions(fromNode);
+      for (final Position nearbyPosition : nearbyPositions) {
+        if (board.isPositionFree(nearbyPosition) || canMakeBridge(fromNode, nearbyPosition)) {
+          result.add(nearbyPosition);
+        }
+      }
+      return result;
+    }
+  }
+
+  private boolean canMakeBridge(final MazeNode mazeNode, final Position neighbourPosition) {
+    final Direction movementDirection = getMovementDirection(mazeNode.getPosition(), neighbourPosition);
+    Position currentPosition = mazeNode.getPosition();
+    while (true) {
+      final Optional<Position> nextPosition = board.getPositionFrom(currentPosition, movementDirection);
+      if (nextPosition.isPresent()) {
+        // next position is on board
+        final List<MazeNode> mazeNodesAtPosition = board.getMazeNodesAtPosition(nextPosition.get());
+        if (mazeNodesAtPosition.isEmpty()) {
+          System.out.println("Can make Bridge at " + currentPosition);
+          return true;
+        } else {
+          if (mazeNodesAtPosition.size() != 1) {
+            return false;
+          }
+          final MazeNodeOrientation orientation = getOrientation(mazeNodesAtPosition.getFirst());
+          if (orientation.equals(HORIZONTAL) && (movementDirection.equals(UP) || movementDirection.equals(DOWN))) {
+            currentPosition = nextPosition.get();
+          } else if (orientation.equals(VERTICAL) && (movementDirection.equals(LEFT) || movementDirection.equals(RIGHT))) {
+            currentPosition = nextPosition.get();
+          } else {
+            return false;
+          }
+        }
+      } else {
+        return false;
+      }
+    }
+  }
+
+  private MazeNodeOrientation getOrientation(final MazeNode mazeNode) {
+    final Set<Direction> directionsToLinks = getDirectionsToLinks(mazeNode);
+    if (directionsToLinks.equals(Set.of(Direction.UP, Direction.DOWN))) {
+      return MazeNodeOrientation.VERTICAL;
+    } else if (directionsToLinks.equals(Set.of(LEFT, Direction.RIGHT))) {
+      return HORIZONTAL;
+    } else {
+      return MazeNodeOrientation.MULTIPLE;
+    }
+  }
+
+  private void addNodeToMaze(final MazeNode mazeNode, final MazeNode parent) {
+    board.addNode(mazeNode);
+    if (parent != null) {
+      parent.getChildren().add(mazeNode);
+      mazeNode.setParent(parent);
+    }
+    lastAddedNode = mazeNode;
+    board.getNonFinalPositions().add(mazeNode.getPosition());
+  }
+
+  private void addNextNode() {
+    final MazeNode nodeToStartFrom = getNodeToStartFrom();
+    System.out.println("Starting from node: " + nodeToStartFrom.getPosition());
+    final Optional<Position> nextFreePosition = getNextFreePosition(nodeToStartFrom);
+
+    if (nextFreePosition.isPresent()) {
+      final Position nextPosition = nextFreePosition.get();
+      final boolean isBridge = !board.isPositionFree(nextPosition);
+      if (isBridge) {
+        System.out.println("Starting on continuing bridge from " + nodeToStartFrom.position + " on " + nextPosition);
+        final MazeNode newMazeNode = new MazeNode(nodeToStartFrom, nextPosition, board.isEdge(nextPosition));
+        addNodeToMaze(newMazeNode, nodeToStartFrom);
+        // bridges are final, we'll start from them by convention
+        board.markAsFinal(nextPosition);
+        currentBridgeNode = newMazeNode;
+        currentBridgeDirection = getMovementDirection(nodeToStartFrom.getPosition(), nextPosition);
+      } else {
         if (currentBridgeNode != null) {
-            return currentBridgeNode;
+          // ending bridge
+          currentBridgeDirection = null;
+          currentBridgeNode = null;
         }
-        if (nonFinalMazeNodes.containsKey(lastAddedNode.getPosition())) {
-            System.out.println("Looking at lastAddedNode " + lastAddedNode.getPosition());
-            return lastAddedNode;
-        } else {
-            Position randomNonFinalPosition = RandomGenerator.getRandomPositionFrom(nonFinalMazeNodes.keySet().stream().toList());
-            System.out.println("Looking at nonFinalPosition " + randomNonFinalPosition);
-            return nonFinalMazeNodes.get(randomNonFinalPosition);
-        }
+        final MazeNode newMazeNode = new MazeNode(nodeToStartFrom, nextPosition, board.isEdge(nextPosition));
+        addNodeToMaze(newMazeNode, nodeToStartFrom);
+      }
+    } else {
+      board.markAsFinal(nodeToStartFrom.getPosition());
     }
-
-    private static Position getRandomFreeNeighbour(MazeNode fromNode) {
-        List<Position> freeBoardNeighbours =
-                maze.getMazeConfig().hasBridges() ? maze.getFreeNearbyPositionsWithBridges(fromNode) :
-                        maze.getFreeNearbyPositionsNoBridges(fromNode);
-        if (freeBoardNeighbours.isEmpty()) {
-            return null;
-        }
-        return RandomGenerator.getRandomPositionFrom(freeBoardNeighbours);
-    }
-
-    private static void addNodeToMaze(MazeNode mazeNode, MazeNode parent) {
-        if (parent != null) {
-            System.out.println("Adding node " + mazeNode.getPosition() + " to parent " + parent.getPosition());
-        }
-        maze.addNodeToMaze(mazeNode);
-        if (parent != null) {
-            parent.getChildren().add(mazeNode);
-            mazeNode.setParent(parent);
-        }
-        lastAddedNode = mazeNode;
-        nonFinalMazeNodes.put(mazeNode.getPosition(), mazeNode);
-    }
-
-
+  }
 }
