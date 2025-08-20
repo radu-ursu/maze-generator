@@ -65,7 +65,7 @@ public class SvgGenerator {
                                     .portal {
                                       stroke: #00e;
                                       stroke-width: 1;
-                                      fill: none;
+                                      fill: #00e;
                                     }
                         </style>
         

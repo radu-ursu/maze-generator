@@ -111,4 +111,11 @@ public class Board {
   public boolean isPortal(final Position position) {
     return getPortal(position).isPresent();
   }
+
+  public boolean isNear(final Position position1, final Position position2) {
+    return getPositionFrom(position1, DOWN).orElse(position1).equals(position2)
+        || getPositionFrom(position1, UP).orElse(position1).equals(position2)
+        || getPositionFrom(position1, LEFT).orElse(position1).equals(position2)
+        || getPositionFrom(position1, RIGHT).orElse(position1).equals(position2);
+  }
 }

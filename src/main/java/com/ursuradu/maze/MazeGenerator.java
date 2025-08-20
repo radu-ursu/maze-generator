@@ -63,6 +63,7 @@ public class MazeGenerator {
       if (!board.isPortal(randomPosition1)
           && !board.isPortal(randomPosition2)
           && !randomPosition1.equals(randomPosition2)
+          && !board.isNear(randomPosition1, randomPosition2)
       ) {
         return new Portal(randomPosition1, randomPosition2);
       }
@@ -208,6 +209,7 @@ public class MazeGenerator {
   }
 
   private void addNodeToMaze(final MazeNode mazeNode, final MazeNode parent) {
+    System.out.println("Adding node to maze: " + mazeNode);
     board.addNode(mazeNode);
     if (parent != null) {
       parent.getChildren().add(mazeNode);
@@ -240,21 +242,24 @@ public class MazeGenerator {
       } else {
         // ending bridge
         if (currentBridgeNode != null) {
+          System.out.println("Ending bridge");
           currentBridgeDirection = null;
           currentBridgeNode = null;
         }
         final MazeNode newMazeNode = new MazeNode(nodeToStartFrom, nextPosition, board.isEdge(nextPosition));
         addNodeToMaze(newMazeNode, nodeToStartFrom);
         if (board.isPortal(nextPosition)) {
-          if (currentPortalNode != null) {
+          if (currentPortalNode == null) {
             // entering portal
             board.markAsFinal(nextPosition);
             currentPortalNode = newMazeNode;
           } else {
             // exiting portal
             board.markAsFinal(nextPosition);
-            currentPortalNode = null;
+            currentPortalNode = newMazeNode;
           }
+        } else {
+          currentPortalNode = null;
         }
       }
     } else {
