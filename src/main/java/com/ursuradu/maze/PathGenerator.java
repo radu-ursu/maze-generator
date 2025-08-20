@@ -7,18 +7,21 @@ public class PathGenerator {
 
     final List<MazePath> paths = new ArrayList<>();
     final Stack<MazeNode> stack = new Stack<>();
+    final Board board;
     AtomicInteger counter = new AtomicInteger(0);
+
+    public PathGenerator(Board board) {
+        this.board = board;
+    }
 
     public MazePath getPath(final MazeNode root) {
 
         processNodeAndChildren(root);
-//        paths.forEach(System.out::println);
         paths.forEach(
                 path -> path.getNodes().forEach(
                         node -> {
-                            if (node.isPortal) {
-                                path.setContainsPortals(true);
-                            }
+                            Optional<Portal> portal = board.getPortal(node.getPosition());
+                            portal.ifPresent(value -> path.getPortals().put(value.getId(), value));
                         }
                 )
         );

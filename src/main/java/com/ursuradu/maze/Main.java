@@ -9,7 +9,7 @@ public class Main {
 
     public static void main(final String[] args) {
 
-        final MazeConfig mazeConfig = new MazeConfig(25, 25, true, MazeDrawType.CLASSIC, false, 2, true);
+        final MazeConfig mazeConfig = new MazeConfig(25, 25, true, MazeDrawType.CLASSIC, false, 5, true);
         mazeConfig.validate();
         MazePath path;
         MazeNode root;
@@ -20,10 +20,10 @@ public class Main {
             root = mazeGenerator.generateMaze();
             System.out.println("Generation completed");
 
-            final PathGenerator pathGenerator = new PathGenerator();
+            final PathGenerator pathGenerator = new PathGenerator(board);
             path = pathGenerator.getPath(root);
             System.out.println(path);
-        } while (mazeConfig.portals() > 0 && mazeConfig.correctPathMustContainPortals() && !path.isContainsPortals());
+        } while (mazeConfig.portals() > 0 && mazeConfig.correctPathMustContainPortals() && path.getPortals().size() != mazeConfig.portals());
         final SvgGenerator svgGenerator = new SvgGenerator(mazeConfig, board);
         final String contentSolution = svgGenerator.generateSVG(path, true);
         final String content = svgGenerator.generateSVG(path, false);
