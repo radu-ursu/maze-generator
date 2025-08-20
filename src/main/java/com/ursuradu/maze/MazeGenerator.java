@@ -66,10 +66,13 @@ public class MazeGenerator {
     public MazeNode generateMaze() {
 
         for (int x = 0; x < mazeConfig.portals(); x++) {
-            board.getPortals().add(getNewPortal());
+            int id = board.getPortals().size() + 1;
+            Portal newPortal = getNewPortal();
+            newPortal.setId(id);
+            board.getPortals().add(newPortal);
             //debug
-            System.out.println(board.getPortals().getFirst());
         }
+        board.getPortals().forEach(System.out::println);
 
         final Position startPosition = RandomGenerator.getRandomEdgePosition(board);
         System.out.println("Root: " + startPosition);
