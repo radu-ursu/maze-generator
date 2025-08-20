@@ -4,9 +4,11 @@ import static com.ursuradu.maze.Direction.DOWN;
 import static com.ursuradu.maze.Direction.LEFT;
 import static com.ursuradu.maze.Direction.RIGHT;
 import static com.ursuradu.maze.Direction.UP;
+import static com.ursuradu.maze.MazeGenerator.getMovementDirection;
 
 import java.util.HashSet;
 import java.util.List;
+import java.util.Optional;
 import java.util.Set;
 
 public class SvgGenerator {
@@ -43,14 +45,14 @@ public class SvgGenerator {
                                     }
                                     .path-outer {
                                       stroke: #555;
-                                      stroke-width: 60;
+                                      stroke-width: 80;
                                       fill: none;
                                       shape-rendering: crispEdges;
         
                                     }
                                     .path-inner {
                                       stroke: #fff;
-                                      stroke-width: 40;
+                                      stroke-width: 60;
                                       fill: none;
                                       shape-rendering: crispEdges;
                                     }
@@ -112,7 +114,19 @@ public class SvgGenerator {
 
       final Set<Direction> directions = MazeGenerator.getDirectionsToLinks(node);
       addDirectionForStartAndEndOfPath(node, directions);
+
+      // remove children/parent directions for portal
+      final Optional<Portal> portal = board.getPortal(node.getPosition());
+      if (portal.isPresent()) {
+        directions.clear();
+        if (portal.get().getEnter().equals(node.getPosition())) {
+          directions.add(getMovementDirection(node.getPosition(), node.getParent().getPosition()));
+        } else {
+          directions.add(getMovementDirection(node.getPosition(), node.getChildren().getFirst().getPosition()));
+        }
+      }
       shapeSvg.append(shapeProvider.getShapeSvg(directions));
+
     } else {
       shapeSvg.append(shapeProvider.getBridgeShapeSvg());
     }
