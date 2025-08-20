@@ -6,7 +6,8 @@ public record MazeConfig(
     boolean showPath,
     MazeDrawType drawType,
     boolean hasBridges,
-    int portals
+    int portals,
+    boolean correctPathMustContainPortals
 ) {
 
   public void validate() {
