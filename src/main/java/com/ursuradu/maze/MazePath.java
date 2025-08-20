@@ -1,25 +1,30 @@
 package com.ursuradu.maze;
 
-import java.util.List;
-
-import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.Setter;
 
+import java.util.List;
+
 @Getter
 @Setter
-@AllArgsConstructor
 public class MazePath {
 
-  private int junctions;
-  private List<MazeNode> nodes;
+    private int junctions;
+    private List<MazeNode> nodes;
+    private boolean containsPortals;
 
-  @Override
-  public String toString() {
-    return "MazePath{" +
-        "size=" + nodes.size() +
-        "junctions=" + junctions +
-        ", nodes=" + nodes +
-        '}';
-  }
+    public MazePath(int junctions, List<MazeNode> nodes) {
+        this.junctions = junctions;
+        this.nodes = nodes;
+    }
+
+    @Override
+    public String toString() {
+        return "MazePath{" +
+                "size=" + nodes.size() +
+                ", containsPortals=" + containsPortals +
+                ", junctions=" + junctions +
+                ", nodes=" + nodes +
+                '}';
+    }
 }

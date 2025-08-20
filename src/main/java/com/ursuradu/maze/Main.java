@@ -7,41 +7,57 @@ import java.io.IOException;
 
 public class Main {
 
-  public static void main(final String[] args) {
+    public static void main(final String[] args) {
 
-    final MazeConfig mazeConfig = new MazeConfig(20, 20, true, MazeDrawType.THICK, true, 1);
-    mazeConfig.validate();
-    final Board board = new Board(mazeConfig);
-    final MazeGenerator mazeGenerator = new MazeGenerator(board, mazeConfig);
-    final MazeNode root = mazeGenerator.generateMaze();
-    System.out.println("Generation completed");
+        final MazeConfig mazeConfig = new MazeConfig(15, 15, true, MazeDrawType.CLASSIC, false, 1);
+        mazeConfig.validate();
+        MazePath path;
+        MazeNode root;
+        Board board;
+        do {
+            board = new Board(mazeConfig);
+            final MazeGenerator mazeGenerator = new MazeGenerator(board, mazeConfig);
+            root = mazeGenerator.generateMaze();
+            System.out.println("Generation completed");
 
-    final PathGenerator pathGenerator = new PathGenerator();
-    final MazePath path = pathGenerator.getPath(root);
-    System.out.println(path);
+            final PathGenerator pathGenerator = new PathGenerator();
+            path = pathGenerator.getPath(root);
+            System.out.println(path);
+        } while (mazeConfig.portals() > 0 && !path.isContainsPortals());
+        final SvgGenerator svgGenerator = new SvgGenerator(mazeConfig, board);
+        final String contentSolution = svgGenerator.generateSVG(path, true);
+        final String content = svgGenerator.generateSVG(path, false);
 
-    final SvgGenerator svgGenerator = new SvgGenerator(mazeConfig, board);
-    final String content = svgGenerator.generateSVG(path);
-    final String fileName = "maze.svg";
+        String solutionFileName = "maze-solution.svg";
+        saveFile(solutionFileName, contentSolution);
+        String mazeFileName = "maze.svg";
+        saveFile(mazeFileName, content);
 
-    // Save SVG to file
-    try (final FileWriter writer = new FileWriter(fileName)) {
-      writer.write(content);
-      System.out.println("SVG file saved as " + fileName);
-    } catch (final IOException e) {
-      e.printStackTrace();
+        // Open in default browser
+        openInBrowser(mazeFileName);
+        openInBrowser(solutionFileName);
+
     }
 
-    // Open in default browser
-    try {
-      final File svgFile = new File(fileName);
-      if (svgFile.exists()) {
-        Desktop.getDesktop().browse(svgFile.toURI());
-        System.out.println("Opened SVG in browser.");
-      }
-    } catch (final IOException e) {
-      e.printStackTrace();
+    private static void openInBrowser(String mazeFileName) {
+        try {
+            final File svgFile = new File(mazeFileName);
+            if (svgFile.exists()) {
+                Desktop.getDesktop().browse(svgFile.toURI());
+                System.out.println("Opened SVG in browser.");
+            }
+        } catch (final IOException e) {
+            e.printStackTrace();
+        }
     }
 
-  }
+    private static void saveFile(String fileName, String contentSolution) {
+        // Save SVG to file
+        try (final FileWriter writer = new FileWriter(fileName)) {
+            writer.write(contentSolution);
+            System.out.println("SVG file saved as " + fileName);
+        } catch (final IOException e) {
+            e.printStackTrace();
+        }
+    }
 }
