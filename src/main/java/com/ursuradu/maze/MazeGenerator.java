@@ -10,12 +10,15 @@ import static com.ursuradu.maze.MazeNodeOrientation.VERTICAL;
 
 public class MazeGenerator {
 
+    public static final int CURRENT_PORTAL_NODE_MAX_REPEAT = 3;
     private final Board board;
     private final MazeConfig mazeConfig;
     private MazeNode lastAddedNode;
     private MazeNode currentBridgeNode;
     private Direction currentBridgeDirection;
     private MazeNode currentPortalNode;
+    // if you get out of a portal and cannot move further, don't enter a loop
+    private Deque<MazeNode> currentPortalNodeHistory = new ArrayDeque<>();
 
     public MazeGenerator(final Board board, final MazeConfig mazeConfig) {
         this.board = board;
@@ -91,11 +94,13 @@ public class MazeGenerator {
             return currentBridgeNode;
         }
         if (currentPortalNode != null) {
-            return currentPortalNode;
-        }
-        if (board.isPortal(lastAddedNode.getPosition())) {
-            //debug
-            System.out.println("Lastaddednode is portal");
+            currentPortalNodeHistory.addLast(currentPortalNode);
+            if (currentPortalNodeHistory.size() > CURRENT_PORTAL_NODE_MAX_REPEAT) {
+                currentPortalNodeHistory.removeFirst();
+            }
+            if (currentPortalNodeHistory.size() != CURRENT_PORTAL_NODE_MAX_REPEAT || !sameValueEntireList()) {
+                return currentPortalNode;
+            }
         }
         if (board.getNonFinalPositions().contains(lastAddedNode.getPosition())) {
             System.out.println("Looking at lastAddedNode " + lastAddedNode.getPosition());
@@ -106,6 +111,15 @@ public class MazeGenerator {
             // by convention bridges are final so we will not get them here
             return board.getMazeMap().get(randomNonFinalPosition).getFirst();
         }
+    }
+
+    private boolean sameValueEntireList() {
+        boolean result = currentPortalNodeHistory.size() == CURRENT_PORTAL_NODE_MAX_REPEAT &&
+                Collections.frequency(currentPortalNodeHistory, currentPortalNode) == CURRENT_PORTAL_NODE_MAX_REPEAT;
+        if (result) {
+            System.out.println("Same value 3 times! " + currentPortalNodeHistory);
+        }
+        return result;
     }
 
     private Optional<Position> getNextFreePosition(final MazeNode fromNode) {

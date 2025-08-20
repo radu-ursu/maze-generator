@@ -9,7 +9,7 @@ public class Main {
 
     public static void main(final String[] args) {
 
-        final MazeConfig mazeConfig = new MazeConfig(25, 25, true, MazeDrawType.CLASSIC, false, 5, true);
+        final MazeConfig mazeConfig = new MazeConfig(25, 25, true, MazeDrawType.CLASSIC, false, 7, true);
         mazeConfig.validate();
         MazePath path;
         MazeNode root;
