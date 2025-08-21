@@ -28,9 +28,9 @@ public class SvgGenerator {
         this.path.getNodes().forEach(node -> pathPositions.add(node.getPosition()));
         this.shapeProvider = getShapeProvider(mazeConfig);
         final StringBuilder svg = new StringBuilder();
-        final int viewBoxWidth = board.getWidth() * SCALE;
-        final int viewBoxHeight = board.getHeight() * SCALE;
-        svg.append("<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 ");
+        final int viewBoxWidth = board.getWidth() * SCALE + 2 * SCALE;
+        final int viewBoxHeight = board.getHeight() * SCALE + 2 * SCALE;
+        svg.append("<svg xmlns='http://www.w3.org/2000/svg' viewBox='-200 -200 ");
         svg.append(viewBoxWidth).append(" ").append(viewBoxHeight).append("'>\n");
         svg.append("""
                                 <style>
@@ -65,9 +65,16 @@ public class SvgGenerator {
                 
                 """);
         svg.append("""
-                  <rect x="0" y="0" width="%d" height="%d" fill="#fff"/>
+                  <rect x="-200" y="-200" width="%d" height="%d" fill="#fff"/>
                 """.formatted(viewBoxWidth, viewBoxHeight));
-
+        svg.append("""
+                <defs>
+                <marker id="arrowhead" markerWidth="10" markerHeight="7"
+                refX="10" refY="3.5" orient="auto">
+                <polygon points="0 0, 10 3.5, 0 7" fill="black" />
+                </marker>
+                </defs>
+                """);
         for (final Position position : board.getMazeMap().keySet()) {
             drawPosition(position, svg, showSolution);
         }
@@ -77,10 +84,10 @@ public class SvgGenerator {
     }
 
     private ShapeProvider getShapeProvider(final MazeConfig mazeConfig) {
-        if (mazeConfig.drawType().equals(MazeDrawType.THICK)) {
+        if (mazeConfig.getDrawType().equals(MazeDrawType.THICK)) {
             return new ThickShapes();
         }
-        if (mazeConfig.drawType().equals(MazeDrawType.CLASSIC)) {
+        if (mazeConfig.getDrawType().equals(MazeDrawType.CLASSIC)) {
             return new MarginShapes();
         }
         throw new IllegalArgumentException("Don't know what shapeProvider to provide");
@@ -105,7 +112,10 @@ public class SvgGenerator {
             final MazeNode node = nodes.getFirst();
 
             final Set<Direction> directions = MazeGenerator.getDirectionsToLinks(node);
-            addDirectionForStartAndEndOfPath(node, directions);
+            Optional<Direction> directionForStartAndEndOfPath = getExtraDirectionForStartAndEndOfPath(node);
+            if (directionForStartAndEndOfPath.isPresent()) {
+                directions.add(directionForStartAndEndOfPath.get());
+            }
 
             // remove children/parent directions for portal
             final Optional<Portal> portal = board.getPortal(node.getPosition());
@@ -118,7 +128,31 @@ public class SvgGenerator {
                 }
             }
             shapeSvg.append(shapeProvider.getShapeSvg(directions));
-
+            if (directionForStartAndEndOfPath.isPresent()) {
+                Direction direction = directionForStartAndEndOfPath.get();
+                if (isLastNodeOfThePath(nodes.getFirst().getPosition())) {
+                    direction = direction.getOpposite();
+                }
+                switch (direction) {
+                    case LEFT:
+                        shapeSvg.append(" <line x1=\"-200\" y1=\"100\" x2=\"0\" y2=\"100\"");
+                        break;
+                    case RIGHT:
+                        shapeSvg.append(" <line x1=\"200\" y1=\"100\" x2=\"400\" y2=\"100\"");
+                        break;
+                    case UP:
+                        shapeSvg.append(" <line x1=\"100\" y1=\"-200\" x2=\"100\" y2=\"0\"");
+                        break;
+                    case DOWN:
+                        shapeSvg.append(" <line x1=\"100\" y1=\"400\" x2=\"100\" y2=\"200\"");
+                        break;
+                }
+//                shapeSvg.append("""
+//
+//                        stroke="black" stroke-width="5"
+//                        marker-end="url(#arrowhead)" />
+//                        """);
+            }
         } else {
             shapeSvg.append(shapeProvider.getBridgeShapeSvg());
         }
@@ -147,34 +181,36 @@ public class SvgGenerator {
                     "                            </g></g>");
 
         }
+        if (isFirstNodeOfThePath(nodes.getFirst().getPosition()) || isLastNodeOfThePath(nodes.getLast().getPosition())) {
+
+        }
+
         return shapeSvg.toString();
     }
 
-    private void addDirectionForStartAndEndOfPath(final MazeNode node, final Set<Direction> directions) {
-        if (isFirstNodeOfThePath(node) || isLastNodeOfThePath(node)) {
+    private Optional<Direction> getExtraDirectionForStartAndEndOfPath(final MazeNode node) {
+        if (isFirstNodeOfThePath(node.getPosition()) || isLastNodeOfThePath(node.getPosition())) {
             if (board.getPositionFrom(node.getPosition(), LEFT).isEmpty()) {
-                directions.add(LEFT);
-                return;
+                return Optional.of(LEFT);
             }
             if (board.getPositionFrom(node.getPosition(), RIGHT).isEmpty()) {
-                directions.add(RIGHT);
-                return;
+                return Optional.of(RIGHT);
             }
             if (board.getPositionFrom(node.getPosition(), UP).isEmpty()) {
-                directions.add(UP);
-                return;
+                return Optional.of(UP);
             }
             if (board.getPositionFrom(node.getPosition(), DOWN).isEmpty()) {
-                directions.add(DOWN);
+                return Optional.of(DOWN);
             }
         }
+        return Optional.empty();
     }
 
-    private boolean isFirstNodeOfThePath(final MazeNode node) {
-        return path.getNodes().getFirst().getPosition().equals(node.getPosition());
+    private boolean isFirstNodeOfThePath(final Position position) {
+        return path.getNodes().getFirst().getPosition().equals(position);
     }
 
-    private boolean isLastNodeOfThePath(final MazeNode node) {
-        return path.getNodes().getLast().getPosition().equals(node.getPosition());
+    private boolean isLastNodeOfThePath(final Position position) {
+        return path.getNodes().getLast().getPosition().equals(position);
     }
 }

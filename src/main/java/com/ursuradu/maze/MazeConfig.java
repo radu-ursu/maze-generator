@@ -1,21 +1,25 @@
 package com.ursuradu.maze;
 
-public record MazeConfig(
-    int width,
-    int height,
-    boolean showPath,
-    MazeDrawType drawType,
-    boolean hasBridges,
-    int portals,
-    boolean correctPathMustContainPortals
-) {
+import lombok.AllArgsConstructor;
+import lombok.Data;
 
-  public void validate() {
-    if (width <= 0 || height <= 0) {
-      throw new IllegalArgumentException("Incorrect width or height");
+@Data
+@AllArgsConstructor
+public class MazeConfig {
+    private int width;
+    private int height;
+    private MazeDrawType drawType;
+    private boolean hasBridges;
+    private int portals;
+    private boolean correctPathMustContainAllPortals;
+
+
+    public void validate() {
+        if (width <= 0 || height <= 0) {
+            throw new IllegalArgumentException("Incorrect width or height");
+        }
+        if (drawType != MazeDrawType.THICK && hasBridges) {
+            hasBridges = false;
+        }
     }
-    if (drawType != MazeDrawType.THICK && hasBridges) {
-      throw new IllegalArgumentException("Can't draw maze with these props");
-    }
-  }
 }

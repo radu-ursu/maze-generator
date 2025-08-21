@@ -68,7 +68,7 @@ public class MazeGenerator {
 
     public MazeNode generateMaze() {
 
-        for (int x = 0; x < mazeConfig.portals(); x++) {
+        for (int x = 0; x < mazeConfig.getPortals(); x++) {
             int id = board.getPortals().size() + 1;
             Portal newPortal = getNewPortal();
             newPortal.setId(id);
@@ -143,14 +143,11 @@ public class MazeGenerator {
 
     private List<Position> getFreePositions(final MazeNode fromNode) {
         // portal present on this node
-        System.out.println("Getting free positions");
         final Position fromPosition = fromNode.getPosition();
         if (board.getPortal(fromPosition).isPresent()) {
             final Portal portal = board.getPortal(fromPosition).get();
-            System.out.println("Found portal " + fromPosition);
             // exiting a portal
             if (portal.getEnter() != null) {
-                System.out.println("On portal exit: " + fromPosition);
                 return board.getFreeNearbyPositions(fromNode);
             } else {
                 portal.setEnter(fromPosition);
@@ -159,7 +156,7 @@ public class MazeGenerator {
                         .collect(Collectors.toCollection(ArrayList::new));
             }
         }
-        if (mazeConfig.hasBridges()) {
+        if (mazeConfig.isHasBridges()) {
             final List<Position> result = new ArrayList<>();
             final List<Position> nearbyPositions = board.getNearbyPositions(fromNode);
             for (final Position nearbyPosition : nearbyPositions) {
@@ -259,7 +256,6 @@ public class MazeGenerator {
                 final MazeNode newMazeNode = new MazeNode(nodeToStartFrom, nextPosition, board.isEdge(nextPosition));
                 addNodeToMaze(newMazeNode, nodeToStartFrom);
                 if (board.isPortal(nextPosition)) {
-                    newMazeNode.setPortal(true);
                     if (currentPortalNode == null) {
                         // entering portal
                         board.markAsFinal(nextPosition);

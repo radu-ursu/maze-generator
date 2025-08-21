@@ -14,7 +14,6 @@ public class MazeNode {
     protected MazeNode parent;
     protected List<MazeNode> children = new ArrayList<>();
     protected boolean isEdge;
-    protected boolean isPortal; // only use for computing paths
 
     public MazeNode(final MazeNode parent, final Position position, final boolean isEdge) {
         this.parent = parent;

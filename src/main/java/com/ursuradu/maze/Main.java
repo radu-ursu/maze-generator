@@ -9,7 +9,7 @@ public class Main {
 
     public static void main(final String[] args) {
 
-        final MazeConfig mazeConfig = new MazeConfig(25, 25, true, MazeDrawType.CLASSIC, false, 7, true);
+        final MazeConfig mazeConfig = new MazeConfig(25, 25, MazeDrawType.CLASSIC, false, 0, true);
         mazeConfig.validate();
         MazePath path;
         MazeNode root;
@@ -23,7 +23,7 @@ public class Main {
             final PathGenerator pathGenerator = new PathGenerator(board);
             path = pathGenerator.getPath(root);
             System.out.println(path);
-        } while (mazeConfig.portals() > 0 && mazeConfig.correctPathMustContainPortals() && path.getPortals().size() != mazeConfig.portals());
+        } while (mazeConfig.getPortals() > 0 && pathIsInvalidWithPortalRequirements(path, mazeConfig));
         final SvgGenerator svgGenerator = new SvgGenerator(mazeConfig, board);
         final String contentSolution = svgGenerator.generateSVG(path, true);
         final String content = svgGenerator.generateSVG(path, false);
@@ -59,5 +59,9 @@ public class Main {
         } catch (final IOException e) {
             e.printStackTrace();
         }
+    }
+
+    private static boolean pathIsInvalidWithPortalRequirements(MazePath path, MazeConfig mazeConfig) {
+        return mazeConfig.isCorrectPathMustContainAllPortals() && path.getPortals().size() != mazeConfig.getPortals();
     }
 }
