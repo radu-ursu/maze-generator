@@ -23,6 +23,11 @@ public class RandomGenerator {
   }
 
   public static Position getRandomPositionFrom(final List<Position> positions) {
+
     return positions.get(random.nextInt(positions.size()));
+  }
+
+  public static int getRandomInt(final int max) {
+    return random.nextInt(1, max);
   }
 }
