@@ -12,7 +12,7 @@ public class Main {
 
   public static void main(final String[] args) {
 
-    final MazeConfig mazeConfig = new MazeConfig(35, 35, MazeDrawType.CLASSIC, false, 5, true, 200);
+    final MazeConfig mazeConfig = new MazeConfig(45, 35, MazeDrawType.CLASSIC, true, 50, true, 20);
     mazeConfig.validate();
     MazePath path = null;
     MazeNode root;
@@ -41,8 +41,8 @@ public class Main {
     saveFile(mazeFileName, content);
 
     // Open in default browser
-    openInBrowser(mazeFileName);
     openInBrowser(solutionFileName);
+    openInBrowser(mazeFileName);
 
   }
 

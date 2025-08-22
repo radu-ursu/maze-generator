@@ -45,14 +45,14 @@ public class SvgGenerator {
                                     }
                                     .path-outer {
                                       stroke: #555;
-                                      stroke-width: 80;
+                                      stroke-width: 100;
                                       fill: none;
                                       shape-rendering: crispEdges;
         
                                     }
                                     .path-inner {
                                       stroke: #fff;
-                                      stroke-width: 60;
+                                      stroke-width: 70;
                                       fill: none;
                                       shape-rendering: crispEdges;
                                     }
