@@ -12,6 +12,7 @@ public class Main {
 
   public static void main(final String[] args) {
 
+    // test commit
     final MazeConfig mazeConfig = new MazeConfig(45, 35, MazeDrawType.CLASSIC, true, 50, true, 20);
     mazeConfig.validate();
     MazePath path = null;
