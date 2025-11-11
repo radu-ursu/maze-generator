@@ -1,11 +1,7 @@
 package com.ursuradu.maze;
 
-import static com.ursuradu.maze.Direction.DOWN;
-import static com.ursuradu.maze.Direction.LEFT;
-import static com.ursuradu.maze.Direction.RIGHT;
-import static com.ursuradu.maze.Direction.UP;
-import static com.ursuradu.maze.MazeNodeOrientation.HORIZONTAL;
-import static com.ursuradu.maze.MazeNodeOrientation.VERTICAL;
+import static com.ursuradu.maze.enums.Direction.*;
+import static com.ursuradu.maze.enums.MazeNodeOrientation.*;
 
 import java.util.ArrayDeque;
 import java.util.ArrayList;
@@ -17,6 +13,14 @@ import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
+
+import com.ursuradu.maze.config.MazeConfig;
+import com.ursuradu.maze.enums.Direction;
+import com.ursuradu.maze.enums.MazeNodeOrientation;
+import com.ursuradu.maze.model.MazeNode;
+import com.ursuradu.maze.model.Portal;
+import com.ursuradu.maze.model.Position;
+import com.ursuradu.maze.utils.RandomGenerator;
 
 public class MazeGenerator {
 
@@ -35,7 +39,8 @@ public class MazeGenerator {
   public MazeGenerator(final Board board, final MazeConfig mazeConfig) {
     this.board = board;
     this.mazeConfig = mazeConfig;
-    this.onTheFlyPortalsRate = RandomGenerator.getRandomInt(mazeConfig.getMaxPortalRate());
+    this.onTheFlyPortalsRate = mazeConfig.getOnTheFlyPortals().isActive() ?
+        RandomGenerator.getRandomInt(mazeConfig.getOnTheFlyPortals().getMaxRate()) : 0;
   }
 
   public static Set<Direction> getDirectionsToLinks(final MazeNode node) {
@@ -69,13 +74,12 @@ public class MazeGenerator {
 
   public MazeNode generateMaze() {
 
-    if (!mazeConfig.isMakePortalsOnTheFly()) {
-      for (int x = 0; x < mazeConfig.getPortals(); x++) {
+    if (!mazeConfig.getOnTheFlyPortals().isActive()) {
+      for (int x = 0; x < mazeConfig.getPortalsCount(); x++) {
         final Portal newPortal = board.getNewPortal();
         board.getPortals().add(newPortal);
       }
     }
-//    board.getPortals().forEach(System.out::println);
 
     final Position startPosition = RandomGenerator.getRandomEdgePosition(board);
     System.out.println("Root: " + startPosition);
@@ -156,7 +160,7 @@ public class MazeGenerator {
             .collect(Collectors.toCollection(ArrayList::new));
       }
     }
-    if (mazeConfig.isHasBridges()) {
+    if (mazeConfig.getStyle().hasBridges()) {
       final List<Position> result = new ArrayList<>();
       final List<Position> nearbyPositions = board.getNearbyPositions(fromNode.getPosition());
       for (final Position nearbyPosition : nearbyPositions) {
@@ -252,11 +256,9 @@ public class MazeGenerator {
           currentBridgeNode = null;
         }
         if (shouldAddOnTheFlyPortal(nextPosition)) {
-//          System.out.println("Adding on the fly portal on " + nextPosition);
           board.addOnTheFlyPortal(nextPosition);
           sinceLastPortal = 0;
-          onTheFlyPortalsRate = RandomGenerator.getRandomInt(mazeConfig.getMaxPortalRate());
-//          System.out.println("Next portal comes after " + onTheFlyPortalsRate);
+          onTheFlyPortalsRate = RandomGenerator.getRandomInt(mazeConfig.getOnTheFlyPortals().getMaxRate());
         } else {
           sinceLastPortal++;
         }
@@ -282,7 +284,7 @@ public class MazeGenerator {
   }
 
   private boolean shouldAddOnTheFlyPortal(final Position position) {
-    if (!mazeConfig.isMakePortalsOnTheFly()) {
+    if (!mazeConfig.getOnTheFlyPortals().isActive()) {
       return false;
     }
     if (board.isPortal(position)) {

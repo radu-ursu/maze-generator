@@ -1,7 +1,10 @@
-package com.ursuradu.maze;
+package com.ursuradu.maze.utils;
 
 import java.util.List;
 import java.util.Random;
+
+import com.ursuradu.maze.Board;
+import com.ursuradu.maze.model.Position;
 
 public class RandomGenerator {
 

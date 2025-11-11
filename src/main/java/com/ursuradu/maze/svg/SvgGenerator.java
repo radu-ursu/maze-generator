@@ -1,15 +1,22 @@
-package com.ursuradu.maze;
+package com.ursuradu.maze.svg;
 
-import static com.ursuradu.maze.Direction.DOWN;
-import static com.ursuradu.maze.Direction.LEFT;
-import static com.ursuradu.maze.Direction.RIGHT;
-import static com.ursuradu.maze.Direction.UP;
 import static com.ursuradu.maze.MazeGenerator.getMovementDirection;
+import static com.ursuradu.maze.enums.Direction.*;
+import static com.ursuradu.maze.enums.MazeDrawStyle.*;
 
 import java.util.HashSet;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
+
+import com.ursuradu.maze.Board;
+import com.ursuradu.maze.MazeGenerator;
+import com.ursuradu.maze.config.MazeConfig;
+import com.ursuradu.maze.enums.Direction;
+import com.ursuradu.maze.model.MazeNode;
+import com.ursuradu.maze.model.MazePath;
+import com.ursuradu.maze.model.Portal;
+import com.ursuradu.maze.model.Position;
 
 public class SvgGenerator {
 
@@ -87,10 +94,10 @@ public class SvgGenerator {
   }
 
   private ShapeProvider getShapeProvider(final MazeConfig mazeConfig) {
-    if (mazeConfig.getDrawType().equals(MazeDrawType.THICK)) {
+    if (mazeConfig.getStyle().equals(PIPES) || mazeConfig.getStyle().equals(PIPES_BRIDGES)) {
       return new ThickShapes();
     }
-    if (mazeConfig.getDrawType().equals(MazeDrawType.CLASSIC)) {
+    if (mazeConfig.getStyle().equals(CLASSIC)) {
       return new MarginShapes();
     }
     throw new IllegalArgumentException("Don't know what shapeProvider to provide");

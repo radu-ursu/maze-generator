@@ -1,9 +1,6 @@
 package com.ursuradu.maze;
 
-import static com.ursuradu.maze.Direction.DOWN;
-import static com.ursuradu.maze.Direction.LEFT;
-import static com.ursuradu.maze.Direction.RIGHT;
-import static com.ursuradu.maze.Direction.UP;
+import static com.ursuradu.maze.enums.Direction.*;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -13,6 +10,12 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
 
+import com.ursuradu.maze.config.MazeConfig;
+import com.ursuradu.maze.enums.Direction;
+import com.ursuradu.maze.model.MazeNode;
+import com.ursuradu.maze.model.Portal;
+import com.ursuradu.maze.model.Position;
+import com.ursuradu.maze.utils.RandomGenerator;
 import lombok.Getter;
 
 @Getter
@@ -34,7 +37,7 @@ public class Board {
         mazeMap.put(new Position(x, y), new ArrayList<>());
       }
     }
-    this.onTheFlyPortalsLeft = mazeConfig.isMakePortalsOnTheFly() ? mazeConfig.getPortals() : 0;
+    this.onTheFlyPortalsLeft = mazeConfig.getOnTheFlyPortals().isActive() ? mazeConfig.getPortalsCount() : 0;
   }
 
   public Portal addOnTheFlyPortal(final Position fromPosition) {
@@ -77,7 +80,6 @@ public class Board {
   }
 
   public void markAsFinal(final Position position) {
-//        System.out.println("Marking as final " + position);
     nonFinalPositions.remove(position);
   }
 
@@ -148,9 +150,6 @@ public class Board {
       ) {
         final Portal portal = new Portal(randomPosition1, randomPosition2);
         final int id = nextPortalId++;
-//        if (id == 6) {
-//          id = nextPortalId++;
-//        }
         portal.setId(id);
         return portal;
       }

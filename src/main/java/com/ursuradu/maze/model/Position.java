@@ -1,4 +1,4 @@
-package com.ursuradu.maze;
+package com.ursuradu.maze.model;
 
 public record Position(int x, int y) {
 

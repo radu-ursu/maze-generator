@@ -1,6 +1,6 @@
 package com.ursuradu.maze;
 
-import static com.ursuradu.maze.PathRequirements.CONTAIN_ALL_PORTALS;
+import static com.ursuradu.maze.enums.PathRequirements.*;
 
 import java.util.ArrayList;
 import java.util.Comparator;
@@ -9,6 +9,12 @@ import java.util.Optional;
 import java.util.Stack;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.Predicate;
+
+import com.ursuradu.maze.config.MazeConfig;
+import com.ursuradu.maze.enums.PathRequirements;
+import com.ursuradu.maze.model.MazeNode;
+import com.ursuradu.maze.model.MazePath;
+import com.ursuradu.maze.model.Portal;
 
 public class PathGenerator {
 
@@ -21,7 +27,7 @@ public class PathGenerator {
     this.board = board;
   }
 
-  public Optional<MazePath> getPath(final MazeNode root, final List<PathRequirements> pathRequirements, final MazeConfig mazeConfig) {
+  public Optional<MazePath> getPath(final MazeNode root, final MazeConfig mazeConfig) {
 
     processNodeAndChildren(root);
     paths.forEach(
@@ -29,18 +35,22 @@ public class PathGenerator {
             node -> {
               final Optional<Portal> portal = board.getPortal(node.getPosition());
               portal.ifPresent(value -> path.getPortals().put(value.getId(), value));
-            }
-        )
+            })
     );
 
     return paths.stream()
-        .filter(getFilter(pathRequirements, mazeConfig))
+        .filter(getFilter(mazeConfig.getPathRequirements(), mazeConfig))
         .max(Comparator.comparingInt(o -> o.getNodes().size()));
   }
 
   private Predicate<MazePath> getFilter(final List<PathRequirements> pathRequirements, final MazeConfig mazeConfig) {
-    if (pathRequirements.contains(CONTAIN_ALL_PORTALS)) {
-      return path -> path.getPortals().size() == mazeConfig.getPortals();
+    if (mazeConfig.getPortalsCount() > 0) {
+      if (pathRequirements.contains(CONTAIN_ALL_PORTALS)) {
+        return path -> path.getPortals().size() == mazeConfig.getPortalsCount();
+      }
+      if (pathRequirements.contains(DONT_CONTAIN_ALL_PORTALS)) {
+        return path -> path.getPortals().size() < mazeConfig.getPortalsCount();
+      }
     }
     return path -> true;
   }
@@ -49,7 +59,7 @@ public class PathGenerator {
 
     stack.push(node);
 
-    if (node.isEdge) {
+    if (node.isEdge()) {
       paths.add(new MazePath(counter.get(), stack.stream().toList()));
     }
     if (!node.getChildren().isEmpty()) {

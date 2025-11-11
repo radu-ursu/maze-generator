@@ -4,6 +4,8 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
+import com.ursuradu.maze.model.MazeNode;
+import com.ursuradu.maze.model.Position;
 import lombok.Getter;
 
 public class MazeEdgePaths {
