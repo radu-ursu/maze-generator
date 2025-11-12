@@ -123,9 +123,7 @@ public class SvgGenerator {
 
       final Set<Direction> directions = MazeGenerator.getDirectionsToLinks(node);
       final Optional<Direction> directionForStartAndEndOfPath = getExtraDirectionForStartAndEndOfPath(node);
-      if (directionForStartAndEndOfPath.isPresent()) {
-        directions.add(directionForStartAndEndOfPath.get());
-      }
+      directionForStartAndEndOfPath.ifPresent(directions::add);
 
       // remove children/parent directions for portal
       final Optional<Portal> portal = board.getPortal(node.getPosition());
@@ -138,31 +136,46 @@ public class SvgGenerator {
         }
       }
       shapeSvg.append(shapeProvider.getShapeSvg(directions));
-//            if (directionForStartAndEndOfPath.isPresent()) {
-//                Direction direction = directionForStartAndEndOfPath.get();
-//                if (isLastNodeOfThePath(nodes.getFirst().getPosition())) {
-//                    direction = direction.getOpposite();
-//                }
-//                switch (direction) {
-//                    case LEFT:
-//                        shapeSvg.append(" <line x1=\"-200\" y1=\"100\" x2=\"0\" y2=\"100\"");
-//                        break;
-//                    case RIGHT:
-//                        shapeSvg.append(" <line x1=\"200\" y1=\"100\" x2=\"400\" y2=\"100\"");
-//                        break;
-//                    case UP:
-//                        shapeSvg.append(" <line x1=\"100\" y1=\"-200\" x2=\"100\" y2=\"0\"");
-//                        break;
-//                    case DOWN:
-//                        shapeSvg.append(" <line x1=\"100\" y1=\"400\" x2=\"100\" y2=\"200\"");
-//                        break;
-//                }
-//                shapeSvg.append("""
-//
-//                        stroke="black" stroke-width="5"
-//                        marker-end="url(#arrowhead)" />
-//                        """);
-//            }
+      // draw arrow for start and end of path
+      if (directionForStartAndEndOfPath.isPresent()) {
+        final Direction direction = directionForStartAndEndOfPath.get();
+        final boolean isExit = isLastNodeOfThePath(nodes.getFirst().getPosition());
+        switch (direction) {
+          case LEFT:
+            if (isExit) {
+              shapeSvg.append(" <line x1=\"0\" y1=\"100\" x2=\"-200\" y2=\"100\"");
+            } else {
+              shapeSvg.append(" <line x1=\"-200\" y1=\"100\" x2=\"0\" y2=\"100\"");
+            }
+            break;
+          case RIGHT:
+            if (isExit) {
+              shapeSvg.append(" <line x1=\"200\" y1=\"100\" x2=\"400\" y2=\"100\"");
+            } else {
+              shapeSvg.append(" <line x1=\"400\" y1=\"100\" x2=\"200\" y2=\"100\"");
+            }
+            break;
+          case UP:
+            if (isExit) {
+              shapeSvg.append(" <line x1=\"100\" y1=\"0\" x2=\"100\" y2=\"-200\"");
+            } else {
+              shapeSvg.append(" <line x1=\"100\" y1=\"-200\" x2=\"100\" y2=\"0\"");
+            }
+            break;
+          case DOWN:
+            if (isExit) {
+              shapeSvg.append(" <line x1=\"100\" y1=\"200\" x2=\"100\" y2=\"400\"");
+            } else {
+              shapeSvg.append(" <line x1=\"100\" y1=\"400\" x2=\"100\" y2=\"200\"");
+            }
+            break;
+        }
+        shapeSvg.append("""
+            
+            stroke="black" stroke-width="5"
+            marker-end="url(#arrowhead)" />
+            """);
+      }
     } else {
       shapeSvg.append(shapeProvider.getBridgeShapeSvg());
     }

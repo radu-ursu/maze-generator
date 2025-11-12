@@ -18,7 +18,7 @@ public class Main {
   private static final String CONTENT_FOLDER_NAME = "mazes";
   private static final String SOLUTION_FOLDER_NAME = "solutions";
 
-  private static final int NUMBER_OF_MAZES = 5;
+  private static final int NUMBER_OF_MAZES = 1;
   // manual configuration
 //  private static final int WIDTH = 10;
 //  private static final int HEIGHT = WIDTH;
@@ -31,7 +31,7 @@ public class Main {
   public static void main(final String[] args) {
 
     final GenerationBatchConfig batchConfig = new GenerationBatchConfig(NUMBER_OF_MAZES, Stream.of(
-            MazeConfigPreset.values()
+            MazeConfigPreset.SMALL_CLASSIC_NO_PORTALS
         )
         .map(MazeConfigPreset::getMazeConfig).toList());
 
@@ -62,14 +62,14 @@ public class Main {
           final String mazeFileName = contentDir.getPath() + File.separator + "maze-" + mazeConfig.getDisplayName() + "-" + i + ".svg";
           System.out.println("Saving maze to " + mazeFileName);
           saveFile(mazeFileName, content);
+          // Open in default browser
+          openInBrowser(solutionFileName);
+          openInBrowser(mazeFileName);
         } catch (final Exception e) {
           System.out.println("Error generating/saving SVG: " + e.getMessage());
         }
       }
     }
-//    // Open in default browser
-//    openInBrowser(solutionFileName);
-//    openInBrowser(mazeFileName);
   }
 
   private static Maze generate(final MazeConfig mazeConfig) {
