@@ -6,10 +6,12 @@ import com.ursuradu.maze.enums.MazeDrawStyle;
 import com.ursuradu.maze.enums.PathRequirements;
 import com.ursuradu.maze.model.OnTheFlyPortals;
 import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.Data;
 
 @Data
 @AllArgsConstructor
+@Builder
 public class MazeConfig {
 
   private String displayName;

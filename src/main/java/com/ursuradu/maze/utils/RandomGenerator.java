@@ -10,6 +10,15 @@ public class RandomGenerator {
 
   static Random random = new Random();
 
+  public static String generateId() {
+    final String chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
+    final StringBuilder sb = new StringBuilder(8);
+    for (int i = 0; i < 8; i++) {
+      sb.append(chars.charAt(random.nextInt(chars.length())));
+    }
+    return sb.toString();
+  }
+
   public static Position getRandomPosition(final Board board) {
     final int randomX = random.nextInt(board.getWidth());
     final int randomY = random.nextInt(board.getHeight());
