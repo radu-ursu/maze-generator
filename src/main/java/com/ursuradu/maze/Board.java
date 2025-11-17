@@ -30,8 +30,8 @@ public class Board {
   private int nextPortalId = 1;
 
   public Board(final MazeConfig mazeConfig) {
-    this.width = mazeConfig.getWidth();
-    this.height = mazeConfig.getHeight();
+    this.width = mazeConfig.getSize().getWidth();
+    this.height = mazeConfig.getSize().getHeight();
     for (int x = 0; x < width; x++) {
       for (int y = 0; y < height; y++) {
         mazeMap.put(new Position(x, y), new ArrayList<>());

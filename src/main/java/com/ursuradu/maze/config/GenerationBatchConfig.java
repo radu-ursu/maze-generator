@@ -1,7 +1,10 @@
 package com.ursuradu.maze.config;
 
+import static java.util.Collections.emptyList;
+
 import java.util.List;
 
+import com.ursuradu.maze.MazeConfigPreset;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -16,5 +19,8 @@ public class GenerationBatchConfig {
   private boolean exportPngs;
   private boolean openSolutionInBrowser;
   private boolean openMazesInBrowser;
-  private List<MazeConfig> mazeConfigs;
+  @Builder.Default
+  private List<MazeConfig> mazeConfigs = emptyList();
+  @Builder.Default
+  private List<MazeConfigPreset> mazeConfigPresets = emptyList();
 }

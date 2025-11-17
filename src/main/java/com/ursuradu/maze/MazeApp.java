@@ -132,8 +132,8 @@ public class MazeApp {
 
   // Helper to format MazeConfig as text
   private static String mazeConfigToText(final MazeConfig config) {
-    return "width: " + config.getWidth() + '\n'
-        + "height: " + config.getHeight() + '\n'
+    return "width: " + config.getSize().getWidth() + '\n'
+        + "height: " + config.getSize().getHeight() + '\n'
         + "drawType: " + config.getStyle() + '\n'
         + "hasBridges: " + config.getStyle().hasBridges() + '\n'
         + "portals: " + config.getPortalsCount() + '\n'
@@ -143,6 +143,7 @@ public class MazeApp {
 
   public void start(final GenerationBatchConfig batchConfig) throws Exception {
 
+    initializeBatchConfig(batchConfig);
     final String currentDateTime = java.time.LocalDateTime.now().format(java.time.format.DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH-mm-ss"));
     final File outputDir = new File(OUTPUT_FOLDER_NAME + File.separator + currentDateTime); // Folder name is safe
     createMazeFolders(outputDir);
@@ -167,5 +168,14 @@ public class MazeApp {
       combinePngs(pngs, combinedPngFilesDirectory);
     }
     System.out.println("Done.");
+  }
+
+  private void initializeBatchConfig(final GenerationBatchConfig batchConfig) {
+    if (!batchConfig.getMazeConfigPresets().isEmpty()) {
+      batchConfig.setMazeConfigs(batchConfig.getMazeConfigPresets()
+          .stream()
+          .map(MazeConfigPreset::getMazeConfig)
+          .toList());
+    }
   }
 }

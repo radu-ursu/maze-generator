@@ -94,7 +94,7 @@ public class SvgGenerator {
   }
 
   private ShapeProvider getShapeProvider(final MazeConfig mazeConfig) {
-    if (mazeConfig.getStyle().equals(PIPES) || mazeConfig.getStyle().equals(PIPES_BRIDGES)) {
+    if (mazeConfig.getStyle().equals(PIPES) || mazeConfig.getStyle().equals(BRIDGES)) {
       return new ThickShapes();
     }
     if (mazeConfig.getStyle().equals(CLASSIC)) {
@@ -208,19 +208,25 @@ public class SvgGenerator {
           """);
       shapeSvg.append("</g>");
 
-      final int portalNumberX = portalPositionX;
-      final int portalNumberY = portalPositionY;
-      shapeSvg.append("<g font-family=\"Arial Black\" font-size=\"100\" text-anchor=\"middle\" dominant-baseline=\"middle\">\n" +
-          "                            <g transform=\"translate(" + portalNumberX + "," + portalNumberY + ")\">\n" +
-          "                            <text>" + board.getPortal(nodes.getFirst().getPosition()).get().getId() + "</text>\n" +
-          "                            </g></g>");
-
-    }
-    if (isFirstNodeOfThePath(nodes.getFirst().getPosition()) || isLastNodeOfThePath(nodes.getLast().getPosition())) {
-      // TODO wtf is this
+      if (shouldAddPortalNumber(mazeConfig)) {
+        addPortalNumber(shapeSvg, portalPositionX, portalPositionY, nodes);
+      }
     }
 
     return shapeSvg.toString();
+  }
+
+  private void addPortalNumber(final StringBuilder shapeSvg, final int portalPositionX, final int portalPositionY, final List<MazeNode> nodes) {
+    final int portalNumberX = portalPositionX;
+    final int portalNumberY = portalPositionY;
+    shapeSvg.append("<g font-family=\"Arial Black\" font-size=\"100\" text-anchor=\"middle\" dominant-baseline=\"middle\">\n" +
+        "                            <g transform=\"translate(" + portalNumberX + "," + portalNumberY + ")\">\n" +
+        "                            <text>" + board.getPortal(nodes.getFirst().getPosition()).get().getId() + "</text>\n" +
+        "                            </g></g>");
+  }
+
+  private boolean shouldAddPortalNumber(final MazeConfig mazeConfig) {
+    return mazeConfig.getPortalsCount() > 1;
   }
 
   private Optional<Direction> getExtraDirectionForStartAndEndOfPath(final MazeNode node) {

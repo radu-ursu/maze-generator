@@ -7,14 +7,15 @@ import com.ursuradu.maze.enums.Direction;
 public final class MarginShapes implements ShapeProvider {
 
   /**
-   * Draw ONLY the internal margins (walls) for a cell as a single <path>. Rule: draw a wall on each side that is NOT in dirs (dirs = open sides).
+   * Draw ONLY the internal margins (walls) for a cell as individual <line> elements. Rule: draw a wall on each side that is NOT in dirs (dirs = open sides).
    *
    * @param dirs open directions (UP/DOWN/LEFT/RIGHT)
    * @param TILE tile size in px (e.g., 200)
-   * @param M wall thickness in px
+   * @param wallThickness wall thickness in px
    */
-  public String getShapeSvg(final Set<Direction> dirs, final int TILE, final int M) {
-    final int m = Math.max(0, Math.min(M, TILE)); // clamp
+  public String getShapeSvg(final Set<Direction> dirs, final int TILE, final int wallThickness) {
+    final int m = Math.max(0, Math.min(wallThickness, TILE)); // clamp
+    final int halfM = m / 2;
     final boolean openUp = dirs.contains(Direction.UP);
     final boolean openDown = dirs.contains(Direction.DOWN);
     final boolean openLeft = dirs.contains(Direction.LEFT);
@@ -22,47 +23,41 @@ public final class MarginShapes implements ShapeProvider {
 
     final StringBuilder d = new StringBuilder();
 
-    // helper to append a rectangle as a subpath
-    // (nonzero fill rule unions subpaths, so no seams between them)
-    final java.util.function.BiConsumer<int[], StringBuilder> rectPath = (r, out) -> {
-      final int x = r[0];
-      final int y = r[1];
-      final int w = r[2];
-      final int h = r[3];
-      out.append("M ").append(x).append(' ').append(y)
-          .append(" h ").append(w)
-          .append(" v ").append(h)
-          .append(" h ").append(-w)
-          .append(" Z ");
-    };
-
-    // Per closed side, add a wall rectangle as a subpath
+    // Per closed side, add a wall line
     if (!openUp) {
-      rectPath.accept(new int[]{0, 0, TILE, m}, d);          // top
+      // Top wall: from (-halfM,0) to (TILE+halfM,0)
+      d.append("<line x1=\"").append(-halfM).append("\" y1=\"0\" x2=\"").append(TILE + halfM).append("\" y2=\"0\" stroke=\"black\" stroke-width=\"").append(m)
+          .append("\" class=\"wall\" />\n");
     }
     if (!openDown) {
-      rectPath.accept(new int[]{0, TILE - m, TILE, m}, d);          // bottom
+      // Bottom wall: from (-halfM,TILE) to (TILE+halfM,TILE)
+      d.append("<line x1=\"").append(-halfM).append("\" y1=\"").append(TILE).append("\" x2=\"").append(TILE + halfM).append("\" y2=\"").append(TILE)
+          .append("\" stroke=\"black\" stroke-width=\"").append(m).append("\" class=\"wall\" />\n");
     }
     if (!openLeft) {
-      rectPath.accept(new int[]{0, 0, m, TILE}, d);       // left
+      // Left wall: from (0,-halfM) to (0,TILE+halfM)
+      d.append("<line x1=\"0\" y1=\"").append(-halfM).append("\" x2=\"0\" y2=\"").append(TILE + halfM).append("\" stroke=\"black\" stroke-width=\"").append(m)
+          .append("\" class=\"wall\" />\n");
     }
     if (!openRight) {
-      rectPath.accept(new int[]{TILE - m, 0, m, TILE}, d);       // right
+      // Right wall: from (TILE,-halfM) to (TILE,TILE+halfM)
+      d.append("<line x1=\"").append(TILE).append("\" y1=\"").append(-halfM).append("\" x2=\"").append(TILE).append("\" y2=\"").append(TILE + halfM)
+          .append("\" stroke=\"black\" stroke-width=\"").append(m).append("\" class=\"wall\" />\n");
     }
 
-    if (d.length() == 0) {
+    if (d.isEmpty()) {
       // Cross (+): fully open => no walls
       return "";
     }
 
-    return "<path d=\"" + d + "\" class=\"wall\" fill-rule=\"nonzero\"/>\n";
+    return d.toString();
   }
 
   /**
    * Default TILE=200, wall thickness M=40.
    */
   public String getShapeSvg(final Set<Direction> dirs) {
-    return getShapeSvg(dirs, 200, 10);
+    return getShapeSvg(dirs, 200, 14);
   }
 
   @Override
