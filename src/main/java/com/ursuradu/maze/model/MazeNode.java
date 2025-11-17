@@ -30,4 +30,8 @@ public class MazeNode {
   public String toString() {
     return position.toString();
   }
+
+  public boolean isCulDeSac() {
+    return children.isEmpty();
+  }
 }

@@ -12,7 +12,6 @@ import java.util.List;
 import com.ursuradu.maze.config.GenerationBatchConfig;
 import com.ursuradu.maze.config.MazeConfig;
 import com.ursuradu.maze.model.MazeNode;
-import com.ursuradu.maze.model.MazePath;
 import com.ursuradu.maze.svg.SvgGenerator;
 
 public class MazeApp {
@@ -77,11 +76,11 @@ public class MazeApp {
       final MazeNode root = mazeGenerator.generateMaze();
 
       final PathGenerator pathGenerator = new PathGenerator(board);
-      final java.util.Optional<MazePath> generated =
-          pathGenerator.getPath(root, mazeConfig);
-      if (generated.isPresent()) {
-        System.out.println("Generated Maze Path: " + generated.get());
-        return new Maze(mazeConfig, board, generated.get());
+      pathGenerator.generatePaths(root);
+      final var solution = pathGenerator.getSolutionPath(mazeConfig);
+      if (solution.isPresent()) {
+        System.out.println("Generated Maze Path: " + solution.get());
+        return new Maze(mazeConfig, board, solution.get());
       } else {
         System.out.println("No Maze Path found! Retrying...");
       }

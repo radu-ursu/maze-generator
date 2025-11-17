@@ -18,8 +18,9 @@ public class Maze {
   private MazeConfig mazeConfig;
   private Board board;
   private MazePath solutionPath;
+  private MazeStats stats;
 
   public Maze(final MazeConfig mazeConfig, final Board board, final MazePath solutionPath) {
-    this(generateId(), mazeConfig, board, solutionPath);
+    this(generateId(), mazeConfig, board, solutionPath, new MazeStats());
   }
 }

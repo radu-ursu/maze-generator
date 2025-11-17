@@ -1,6 +1,6 @@
 package com.ursuradu.maze;
 
-import static com.ursuradu.maze.enums.MazeDrawStyle.CLASSIC;
+import static com.ursuradu.maze.enums.MazeDrawStyle.BRIDGES;
 
 import java.util.stream.Stream;
 
@@ -13,9 +13,9 @@ public class Main {
   public static void main(final String[] args) throws Exception {
 
     final MazeConfig mazeConfig = MazeConfig.builder()
-        .size(MazeSize.MAZE_SIZE_16_22)
-        .portalsCount(5)
-        .style(CLASSIC)
+        .size(MazeSize.MAZE_SIZE_9_13)
+        .portalsCount(1)
+        .style(BRIDGES)
         .build();
     final GenerationBatchConfig batchConfig = GenerationBatchConfig.builder()
         .numberOfMazes(1)
