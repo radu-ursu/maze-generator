@@ -12,24 +12,48 @@ public class StatsComputer {
 
   final List<MazePath> paths = new ArrayList<>();
   final Stack<MazeNode> stack = new Stack<>();
-  final Board board;
+  final Maze maze;
   AtomicInteger junctionCounter = new AtomicInteger(0);
 
-  public StatsComputer(final Board board) {
-    this.board = board;
+  public StatsComputer(final Maze maze) {
+    this.maze = maze;
   }
 
-  public void computePaths(final MazeNode root) {
-    processNodeAndChildren(root);
+  public void computeStats() {
+    computePaths();
+    markAttendableNodes();
   }
 
-  // TODO continue from here. Attendable paths are paths that stop at a junction where there are < x possible ways to go next
-  public List<MazePath> getAttendablePaths() {
-    final List<MazePath> attendableNodes = new ArrayList<>();
+  public void computePaths() {
+    processNodeAndChildren(maze.getSolutionPath().getNodes().getFirst());
+  }
+
+  public void markAttendableNodes() {
     for (final MazePath path : paths) {
-      attendableNodes.addAll(path.getNodes());
+      markAttendableNodesForPath(path);
     }
-    return attendableNodes.stream().distinct().toList();
+  }
+
+  private void markAttendableNodesForPath(final MazePath path) {
+    final List<MazeNode> attendableNodesTillJunction = new ArrayList<>();
+    for (final MazeNode node : path.getNodes()) {
+      if (node.isJunction()) {
+        attendableNodesTillJunction.add(node);
+        attendableNodesTillJunction.forEach(n -> n.setStatsWouldHumanReachThisNode(true));
+        attendableNodesTillJunction.clear();
+      }
+      if (node.getPosition().equals(maze.getSolutionPath().getNodes().getLast().getPosition())) {
+        attendableNodesTillJunction.add(node);
+        attendableNodesTillJunction.forEach(n -> n.setStatsWouldHumanReachThisNode(true));
+        attendableNodesTillJunction.clear();
+        return;
+      } else {
+        attendableNodesTillJunction.add(node);
+      }
+    }
+    if (attendableNodesTillJunction.size() > 5) {
+      attendableNodesTillJunction.subList(0, attendableNodesTillJunction.size() - 5).forEach(n -> n.setStatsWouldHumanReachThisNode(true));
+    }
   }
 
   private void processNodeAndChildren(final MazeNode node) {

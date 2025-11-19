@@ -13,7 +13,7 @@ public class Main {
   public static void main(final String[] args) throws Exception {
 
     final MazeConfig mazeConfig = MazeConfig.builder()
-        .size(MazeSize.MAZE_SIZE_9_13)
+        .size(MazeSize.MAZE_SIZE_16_22)
         .portalsCount(1)
         .style(BRIDGES)
         .build();

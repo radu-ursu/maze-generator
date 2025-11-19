@@ -68,6 +68,11 @@ public class SvgGenerator {
                                       stroke-width: 1;
                                       fill: #e00;
                                     }
+                                    .attendable-node {
+                                      stroke: #00b;
+                                      stroke-width: 1;
+                                      fill: none;
+                                    }
                                     .wall {
                                       fill: #555;
                                     }
@@ -107,12 +112,7 @@ public class SvgGenerator {
 
     final List<MazeNode> mazeNodesAtPosition = board.getMazeNodesAtPosition(position);
     final String svgForNode = getShape(mazeNodesAtPosition, showSolution, position);
-    // TODO temp
-    if (svgForNode != null) {
-      svg.append(svgForNode);
-    } else {
-      System.out.println("Didn't have svg for position: " + position);
-    }
+    svg.append(svgForNode);
   }
 
   private String getShape(final List<MazeNode> nodes, final boolean showSolution, final Position position) {
@@ -196,6 +196,14 @@ public class SvgGenerator {
         shapeSvg.append("""
             <rect x="95" y="95" width="10" height="10" class="correct-path"/>
             """);
+      }
+    }
+    for (final MazeNode node : nodes) {
+      if (node.isStatsWouldHumanReachThisNode()) {
+        shapeSvg.append("""
+            <rect x="90" y="90" width="20" height="20" class="attendable-node"/>
+            """);
+        break;
       }
     }
     shapeSvg.append("</g>\n");

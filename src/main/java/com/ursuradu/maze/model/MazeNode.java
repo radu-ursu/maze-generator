@@ -14,6 +14,7 @@ public class MazeNode {
   protected MazeNode parent;
   protected List<MazeNode> children = new ArrayList<>();
   protected boolean isEdge;
+  protected boolean statsWouldHumanReachThisNode;
 
   public MazeNode(final MazeNode parent, final Position position, final boolean isEdge) {
     this.parent = parent;
@@ -33,5 +34,9 @@ public class MazeNode {
 
   public boolean isCulDeSac() {
     return children.isEmpty();
+  }
+
+  public boolean isJunction() {
+    return children.size() > 1;
   }
 }

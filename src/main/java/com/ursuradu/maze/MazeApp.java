@@ -27,9 +27,10 @@ public class MazeApp {
       System.out.println("Generating mazes with config:\n" + mazeConfigToText(mazeConfig));
       for (int i = 0; i < batchConfig.getNumberOfMazes(); i++) {
         final Maze maze = generate(mazeConfig);
+        final StatsComputer statsComputer = new StatsComputer(maze);
+        statsComputer.computeStats();
         final SvgGenerator svgGenerator = new SvgGenerator(mazeConfig, maze.getBoard());
         try {
-          // TODO fix the error instead of skipping
           final String contentSolution = svgGenerator.generateSVG(maze.getSolutionPath(), true);
           final String content = svgGenerator.generateSVG(maze.getSolutionPath(), false);
 
