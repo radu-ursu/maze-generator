@@ -16,7 +16,7 @@ public class Main {
     public static void main(final String[] args) throws Exception {
 
         final GenerationBatchConfig batchConfig = GenerationBatchConfig.builder()
-                .numberOfMazes(19)
+                .numberOfMazes(10)
                 .combinedImages(false)
                 .exportPngs(true)
                 .openSolutionInBrowser(false)
@@ -28,12 +28,13 @@ public class Main {
 //                                .size(MazeSize.MAZE_SIZE_11_16)
 //                                .portalsCount(5)
 //                                .build(),
-                        getMazeConfigBuilder()
-                                .displayName("classic")
+                        MazeConfig.builder()
+                                .displayName("10 portals not all contained in path")
                                 .style(CLASSIC)
-                                .size(MazeSize.MAZE_SIZE_13_18)
-                                .pathRequirements(Collections.emptyList())
-                                .portalsCount(0)
+                                .size(MazeSize.MAZE_SIZE_16_22)
+//                                .onTheFlyPortals(OnTheFlyPortals.SMALL_RATE)
+                                .pathRequirements(Collections.singletonList(PathRequirements.DONT_CONTAIN_ALL_PORTALS))
+                                .portalsCount(10)
                                 .build()
                 ).toList())
                 .build();

@@ -4,10 +4,12 @@ import com.ursuradu.maze.config.MazeConfig;
 import com.ursuradu.maze.enums.PathRequirements;
 import com.ursuradu.maze.model.MazeNode;
 import com.ursuradu.maze.model.MazePath;
+import com.ursuradu.maze.model.Portal;
 
 import java.util.*;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.Predicate;
+import java.util.stream.Collectors;
 
 import static com.ursuradu.maze.enums.PathRequirements.CONTAIN_ALL_PORTALS;
 import static com.ursuradu.maze.enums.PathRequirements.DONT_CONTAIN_ALL_PORTALS;
@@ -37,14 +39,27 @@ public class PathGenerator {
     private Predicate<MazePath> getFilter(final List<PathRequirements> pathRequirements, final MazeConfig mazeConfig) {
         if (mazeConfig.getPortalsCount() > 0) {
             if (pathRequirements.contains(CONTAIN_ALL_PORTALS)) {
-                return path -> path.getPortals().size() == mazeConfig.getPortalsCount();
+                return path -> {
+                    Set<Portal> containedPortals = getPortalsInPath(path);
+                    return containedPortals.size() == mazeConfig.getPortalsCount();
+                };
             }
-            // TODO why did solution-bridges_7-1y2mxxOG.svg contain all portals?
             if (pathRequirements.contains(DONT_CONTAIN_ALL_PORTALS)) {
-                return path -> path.getPortals().size() < mazeConfig.getPortalsCount();
+                return path -> {
+                    Set<Portal> containedPortals = getPortalsInPath(path);
+                    return containedPortals.size() < mazeConfig.getPortalsCount();
+                };
             }
         }
         return path -> true;
+        // TODO make this return multiple filters so I can also add a filter that has a minimum number of nodes
+    }
+
+    private Set<Portal> getPortalsInPath(MazePath path) {
+        return path.getNodes().stream()
+                .map(node -> board.getPortal(node.getPosition()))
+                .flatMap(Optional::stream)
+                .collect(Collectors.toSet());
     }
 
     private void processNodeAndChildren(final MazeNode node) {
