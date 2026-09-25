@@ -18,6 +18,7 @@ public class MagickUtils {
 
   private static final int DENSITY_DPI = 300;         // SVG → PNG render density (higher = sharper, larger)
   private static final String RESIZE = "";            // e.g. "1024x" or "1024x1024". Leave "" to skip
+  private static final boolean ADD_LABEL = false;
 
   public static void combinePngs(final List<Path> pngs, final File combinedPngFilesDirectory) throws Exception {
     System.out.println("Combining images...");
@@ -45,7 +46,7 @@ public class MagickUtils {
         "-background", "white",
         leftPng.toAbsolutePath().toString(),
         rightPng.toAbsolutePath().toString(),
-        "+append",                                // horizontal stitch
+        "-append",                                // horizontal stitch
         outPng.toAbsolutePath().toString()
     );
     run(cmd, "Tile: " + leftPng.getFileName() + " | " + rightPng.getFileName());
@@ -90,13 +91,15 @@ public class MagickUtils {
       cmd.add(resizeArg);
     }
     // Add a label in the corner
-    cmd.addAll(Arrays.asList(
-        "-gravity", "northwest",        // position
-        "-fill", "white",               // text color
-        "-undercolor", "#00000080",     // semi-transparent background under text
-        "-pointsize", "36",             // font size
-        "-annotate", "+10+10", getAnnotation(svg) // offset from corner and text content
-    ));
+    if (ADD_LABEL) {
+      cmd.addAll(Arrays.asList(
+          "-gravity", "northwest",        // position
+          "-fill", "white",               // text color
+          "-undercolor", "#00000080",     // semi-transparent background under text
+          "-pointsize", "36",             // font size
+          "-annotate", "+10+10", getAnnotation(svg) // offset from corner and text content
+      ));
+    }
 
     cmd.add(png.toAbsolutePath().toString());
     run(cmd, "SVG→PNG: " + svg.getFileName());

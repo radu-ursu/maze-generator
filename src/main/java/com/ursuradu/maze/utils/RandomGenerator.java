@@ -4,6 +4,7 @@ import java.util.List;
 import java.util.Random;
 
 import com.ursuradu.maze.Board;
+import com.ursuradu.maze.enums.PathRequirements;
 import com.ursuradu.maze.model.Position;
 
 public class RandomGenerator {
@@ -25,13 +26,24 @@ public class RandomGenerator {
     return new Position(randomX, randomY);
   }
 
-  public static Position getRandomEdgePosition(final Board board) {
+  public static Position getRandomEdgePosition(final Board board, final List<PathRequirements> pathRequirements) {
     Position position;
     do {
       position = getRandomPosition(board);
     }
-    while (!board.isEdge(position) || board.isPortal(position));
+    while (!isValidStartPosition(board, pathRequirements, position));
     return position;
+  }
+
+  private static boolean isValidStartPosition(final Board board, final List<PathRequirements> pathRequirements, final Position position) {
+    return board.isEdge(position) && !board.isPortal(position) && pathRequirementsSatisfied(pathRequirements, position, board);
+  }
+
+  private static boolean pathRequirementsSatisfied(final List<PathRequirements> pathRequirements, final Position position, final Board board) {
+    if (pathRequirements.contains(PathRequirements.START_FROM_LEFT)) {
+      return board.isLeftEdge(position);
+    }
+    return true;
   }
 
   public static Position getRandomPositionFrom(final List<Position> positions) {

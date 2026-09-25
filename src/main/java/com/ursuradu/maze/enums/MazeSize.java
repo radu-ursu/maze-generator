@@ -11,7 +11,13 @@ public enum MazeSize {
   MAZE_SIZE_13_18(13, 18),
   MAZE_SIZE_14_20(14, 20),
   MAZE_SIZE_15_21(15, 21),
-  MAZE_SIZE_16_22(16, 22);
+  MAZE_SIZE_16_22(16, 22),
+
+  MAZE_SIZE_11_7(11, 7),
+  MAZE_SIZE_12_8(12, 8),
+  MAZE_SIZE_13_9(13, 9),
+  MAZE_SIZE_15_10(15, 10),
+  MAZE_SIZE_17_11(17, 11);
 
   private final int width;
   private final int height;

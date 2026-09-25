@@ -23,4 +23,6 @@ public class GenerationBatchConfig {
   private List<MazeConfig> mazeConfigs = emptyList();
   @Builder.Default
   private List<MazeConfigPreset> mazeConfigPresets = emptyList();
+
+  private String folderNameSuffix;
 }

@@ -1,6 +1,7 @@
 package com.ursuradu.maze;
 
-import static com.ursuradu.maze.utils.MagickUtils.*;
+import static com.ursuradu.maze.utils.MagickUtils.combinePngs;
+import static com.ursuradu.maze.utils.MagickUtils.convertToPngFiles;
 
 import java.awt.*;
 import java.io.File;
@@ -74,7 +75,7 @@ public class MazeApp {
     do {
       board = new Board(mazeConfig);
       final MazeGenerator mazeGenerator = new MazeGenerator(board, mazeConfig);
-      final MazeNode root = mazeGenerator.generateMaze();
+      final MazeNode root = mazeGenerator.generateMaze(mazeConfig);
 
       final PathGenerator pathGenerator = new PathGenerator(board);
       pathGenerator.generatePaths(root);
@@ -145,7 +146,11 @@ public class MazeApp {
 
     initializeBatchConfig(batchConfig);
     final String currentDateTime = java.time.LocalDateTime.now().format(java.time.format.DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH-mm-ss"));
-    final File outputDir = new File(OUTPUT_FOLDER_NAME + File.separator + currentDateTime); // Folder name is safe
+    String folderName = OUTPUT_FOLDER_NAME + File.separator + currentDateTime;
+    if (batchConfig.getFolderNameSuffix() != null) {
+      folderName = folderName + " - " + batchConfig.getFolderNameSuffix();
+    }
+    final File outputDir = new File(folderName); // Folder name is safe
     createMazeFolders(outputDir);
     final File svgFilesDirectory = new File(outputDir, SVG_FOLDER_NAME);
     final File pngFilesDirectory = new File(outputDir, PNG_FOLDER_NAME);

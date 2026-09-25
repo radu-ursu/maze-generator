@@ -1,7 +1,11 @@
 package com.ursuradu.maze;
 
-import static com.ursuradu.maze.enums.Direction.*;
-import static com.ursuradu.maze.enums.MazeNodeOrientation.*;
+import static com.ursuradu.maze.enums.Direction.DOWN;
+import static com.ursuradu.maze.enums.Direction.LEFT;
+import static com.ursuradu.maze.enums.Direction.RIGHT;
+import static com.ursuradu.maze.enums.Direction.UP;
+import static com.ursuradu.maze.enums.MazeNodeOrientation.HORIZONTAL;
+import static com.ursuradu.maze.enums.MazeNodeOrientation.VERTICAL;
 
 import java.util.ArrayDeque;
 import java.util.ArrayList;
@@ -72,16 +76,15 @@ public class MazeGenerator {
     return board.getOnTheFlyPortalsLeft() > 0 && sinceLastPortal == onTheFlyPortalsRate;
   }
 
-  public MazeNode generateMaze() {
+  public MazeNode generateMaze(final MazeConfig mazeConfig) {
 
-    if (!mazeConfig.getOnTheFlyPortals().isActive()) {
-      for (int x = 0; x < mazeConfig.getPortalsCount(); x++) {
+    if (!this.mazeConfig.getOnTheFlyPortals().isActive()) {
+      for (int x = 0; x < this.mazeConfig.getPortalsCount(); x++) {
         final Portal newPortal = board.getNewPortal();
         board.getPortals().add(newPortal);
       }
     }
-
-    final Position startPosition = RandomGenerator.getRandomEdgePosition(board);
+    final Position startPosition = RandomGenerator.getRandomEdgePosition(board, mazeConfig.getPathRequirements());
     System.out.println("Root: " + startPosition);
     final MazeNode root = new MazeNode(startPosition, true);
     addNodeToMaze(root, null);

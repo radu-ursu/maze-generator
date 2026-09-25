@@ -1,6 +1,9 @@
 package com.ursuradu.maze;
 
-import static com.ursuradu.maze.enums.Direction.*;
+import static com.ursuradu.maze.enums.Direction.DOWN;
+import static com.ursuradu.maze.enums.Direction.LEFT;
+import static com.ursuradu.maze.enums.Direction.RIGHT;
+import static com.ursuradu.maze.enums.Direction.UP;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -105,6 +108,10 @@ public class Board {
         || getPositionFrom(position, UP).isEmpty()
         || getPositionFrom(position, LEFT).isEmpty()
         || getPositionFrom(position, RIGHT).isEmpty();
+  }
+
+  public boolean isLeftEdge(final Position position) {
+    return getPositionFrom(position, LEFT).isEmpty();
   }
 
   public void addNode(final MazeNode mazeNode) {
