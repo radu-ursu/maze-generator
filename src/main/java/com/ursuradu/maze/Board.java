@@ -114,6 +114,18 @@ public class Board {
     return getPositionFrom(position, LEFT).isEmpty();
   }
 
+  public boolean isRightEdge(final Position position) {
+    return getPositionFrom(position, RIGHT).isEmpty();
+  }
+
+  public boolean isTopEdge(final Position position) {
+    return getPositionFrom(position, UP).isEmpty();
+  }
+
+  public boolean isBottomEdge(final Position position) {
+    return getPositionFrom(position, DOWN).isEmpty();
+  }
+
   public void addNode(final MazeNode mazeNode) {
     getMazeNodesAtPosition(mazeNode.getPosition()).add(mazeNode);
   }

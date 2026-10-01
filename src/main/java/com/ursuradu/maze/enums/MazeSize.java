@@ -13,6 +13,7 @@ public enum MazeSize {
   MAZE_SIZE_15_21(15, 21),
   MAZE_SIZE_16_22(16, 22),
 
+  // Sizes for A4 split (top and bottom)
   MAZE_SIZE_11_7(11, 7),
   MAZE_SIZE_12_8(12, 8),
   MAZE_SIZE_13_9(13, 9),

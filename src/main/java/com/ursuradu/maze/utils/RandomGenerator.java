@@ -39,9 +39,9 @@ public class RandomGenerator {
     return board.isEdge(position) && !board.isPortal(position) && pathRequirementsSatisfied(pathRequirements, position, board);
   }
 
-  private static boolean pathRequirementsSatisfied(final List<PathRequirements> pathRequirements, final Position position, final Board board) {
+  private static boolean pathRequirementsSatisfied(final List<PathRequirements> pathRequirements, final Position startPosition, final Board board) {
     if (pathRequirements.contains(PathRequirements.START_FROM_LEFT)) {
-      return board.isLeftEdge(position);
+      return board.isLeftEdge(startPosition);
     }
     return true;
   }

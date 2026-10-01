@@ -9,5 +9,6 @@ public enum PathRequirements {
   PATH_LENGTH_MIN,
   PATH_LENGTH_MEDIAN,
 
-  START_FROM_LEFT
+  START_FROM_LEFT,
+  END_TO_RIGHT
 }

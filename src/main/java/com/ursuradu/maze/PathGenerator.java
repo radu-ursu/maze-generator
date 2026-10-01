@@ -2,6 +2,7 @@ package com.ursuradu.maze;
 
 import static com.ursuradu.maze.enums.PathRequirements.CONTAIN_ALL_PORTALS;
 import static com.ursuradu.maze.enums.PathRequirements.DONT_CONTAIN_ALL_PORTALS;
+import static com.ursuradu.maze.enums.PathRequirements.END_TO_RIGHT;
 import static com.ursuradu.maze.enums.PathRequirements.PATH_LENGTH_MAX;
 import static com.ursuradu.maze.enums.PathRequirements.PATH_LENGTH_MEDIAN;
 import static com.ursuradu.maze.enums.PathRequirements.PATH_LENGTH_MIN;
@@ -21,6 +22,7 @@ import com.ursuradu.maze.config.MazeConfig;
 import com.ursuradu.maze.model.MazeNode;
 import com.ursuradu.maze.model.MazePath;
 import com.ursuradu.maze.model.Portal;
+import com.ursuradu.maze.model.Position;
 
 public class PathGenerator {
 
@@ -52,6 +54,9 @@ public class PathGenerator {
       final List<MazePath> list = mazePathStream
           .sorted(Comparator.comparingInt(o -> o.getNodes().size()))
           .toList();
+      if (list.isEmpty()) {
+        return Optional.empty();
+      }
       int maxSize = list.getLast().getNodes().size();
       for (MazePath path : list) {
         if (path.getNodes().size() > maxSize / 2) {
@@ -65,21 +70,33 @@ public class PathGenerator {
   }
 
   private Predicate<MazePath> getFilter(final MazeConfig mazeConfig) {
+
+    Predicate<MazePath> filter = path -> true;
+    if (mazeConfig.getPathRequirements().contains(END_TO_RIGHT)) {
+      filter = filter.and(
+          // no corners to avoid the exit actually being up or down
+          path -> {
+            final Position lastNodePosition = path.getNodes().getLast().getPosition();
+            return board.isRightEdge(lastNodePosition)
+                && !board.isTopEdge(lastNodePosition)
+                && !board.isBottomEdge(lastNodePosition);
+          });
+    }
+
     if (mazeConfig.getPortalsCount() > 0) {
       if (mazeConfig.getPathRequirements().contains(CONTAIN_ALL_PORTALS)) {
-        return path -> {
+        filter = filter.and(path -> {
           Set<Portal> containedPortals = getPortalsInPath(path);
           return containedPortals.size() == mazeConfig.getPortalsCount();
-        };
-      }
-      if (mazeConfig.getPathRequirements().contains(DONT_CONTAIN_ALL_PORTALS)) {
-        return path -> {
+        });
+      } else if (mazeConfig.getPathRequirements().contains(DONT_CONTAIN_ALL_PORTALS)) {
+        filter = filter.and(path -> {
           Set<Portal> containedPortals = getPortalsInPath(path);
           return containedPortals.size() < mazeConfig.getPortalsCount();
-        };
+        });
       }
     }
-    return path -> true;
+    return filter;
     // TODO make this return multiple filters so I can also add a filter that has a minimum number of nodes
   }
 
