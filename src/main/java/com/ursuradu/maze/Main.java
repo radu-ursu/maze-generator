@@ -32,7 +32,7 @@ public class Main {
             MazeConfig.builder()
                 .displayName("test")
                 .style(CLASSIC)
-                .size(MAZE_SIZE_17_11)
+                .size(MAZE_SIZE_16_24)
 //                                .onTheFlyPortals(OnTheFlyPortals.SMALL_RATE)
                 .pathRequirements(List.of(DONT_CONTAIN_ALL_PORTALS, START_FROM_LEFT, END_TO_RIGHT))
                 .portalsCount(2)

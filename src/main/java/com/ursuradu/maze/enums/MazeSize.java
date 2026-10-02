@@ -7,11 +7,13 @@ public enum MazeSize {
   MAZE_SIZE_9_13(9, 13),
   MAZE_SIZE_10_14(10, 14),
   MAZE_SIZE_11_16(11, 16),
+
+  // Sizes for A4 portrait
   MAZE_SIZE_12_17(12, 17),
-  MAZE_SIZE_13_18(13, 18),
-  MAZE_SIZE_14_20(14, 20),
-  MAZE_SIZE_15_21(15, 21),
-  MAZE_SIZE_16_22(16, 22),
+  MAZE_SIZE_13_19(13, 19),
+  MAZE_SIZE_14_21(14, 21),
+  MAZE_SIZE_15_23(15, 23),
+  MAZE_SIZE_16_24(16, 24),
 
   // Sizes for A4 split (top and bottom)
   MAZE_SIZE_11_7(11, 7),
